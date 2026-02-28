@@ -1,0 +1,460 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0BA03FEAE4A412322F86B374 /* ProcessedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC00C69EFA008B462372A49 /* ProcessedItem.swift */; };
+		1438AE31104AD72AC27E312F /* ProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870E1134EBAB352472E6D72C /* ProcessingView.swift */; };
+		26E3E289D57F8F4D9DF66B24 /* CropOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */; };
+		3A05534881D1C4EC22EB99B7 /* SlideCropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D4CFD669EB22F24902F9A8 /* SlideCropApp.swift */; };
+		44CB1F68C9B4DD179EC23BE0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */; };
+		4C0DA11F095B26524AE50EB1 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */; };
+		55D005FC4534DBFAEFF4487D /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */; };
+		578F2054A9297A9E981FBE1E /* HeroCropIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062648169CC9BFB6D008A275 /* HeroCropIconView.swift */; };
+		611FED8B76776C7E8D1D305F /* PressScaleButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */; };
+		680DC6A64DE63CEA75DF58BA /* ResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */; };
+		69E8B2FE0E91B9622CA44492 /* ProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */; };
+		79A18CE60F04840D3AF10AF5 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */; };
+		AF415689B2F6E4141750A29C /* SlideCropError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5512314C55B71F36594470AD /* SlideCropError.swift */; };
+		BDA637CE0526E7F524B20711 /* ZoomableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6659011523E4294CAF4F376 /* ZoomableImageView.swift */; };
+		BDE067D820D13857D3EBAF5F /* ResultThumbnailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94F8BBB8EC122AFE9C9E2E34 /* ResultThumbnailCell.swift */; };
+		C042C4F74F0894E79F5E9977 /* CropQuad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7219AA8109A749C19EF5E /* CropQuad.swift */; };
+		C4DED342F936CE8459E9EC42 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B868432921A473756E539937 /* CompareView.swift */; };
+		C57F2EDBBD683EDF8DD192AC /* ProcessingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673A41447F8B34BE9198B72C /* ProcessingSettings.swift */; };
+		C82D8F93E1FC8FB7AF0221CC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4B48E8ED9FA97907692D9C /* SettingsView.swift */; };
+		D0D7DE9B3CE7CEBFEAFB0FB6 /* SlideCropService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24B0668612CA7E446EE759D /* SlideCropService.swift */; };
+		D7623FDE7ECD843100B6037C /* CropAdjustmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */; };
+		F001A0A0A0A0A0A0A0A0A001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */; };
+		F001A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */; };
+		F001A0A0A0A0A0A0A0A0A003 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		062648169CC9BFB6D008A275 /* HeroCropIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCropIconView.swift; sourceTree = "<group>"; };
+		236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlideCrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BE7219AA8109A749C19EF5E /* CropQuad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropQuad.swift; sourceTree = "<group>"; };
+		3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropOverlayView.swift; sourceTree = "<group>"; };
+		4BC00C69EFA008B462372A49 /* ProcessedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessedItem.swift; sourceTree = "<group>"; };
+		5512314C55B71F36594470AD /* SlideCropError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropError.swift; sourceTree = "<group>"; };
+		5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropAdjustmentView.swift; sourceTree = "<group>"; };
+		673A41447F8B34BE9198B72C /* ProcessingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingSettings.swift; sourceTree = "<group>"; };
+		6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingViewModel.swift; sourceTree = "<group>"; };
+		70D4CFD669EB22F24902F9A8 /* SlideCropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropApp.swift; sourceTree = "<group>"; };
+		77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsViewModel.swift; sourceTree = "<group>"; };
+		80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		870E1134EBAB352472E6D72C /* ProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingView.swift; sourceTree = "<group>"; };
+		8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressScaleButtonStyle.swift; sourceTree = "<group>"; };
+		94F8BBB8EC122AFE9C9E2E34 /* ResultThumbnailCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultThumbnailCell.swift; sourceTree = "<group>"; };
+		B868432921A473756E539937 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
+		C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		C6659011523E4294CAF4F376 /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
+		D24B0668612CA7E446EE759D /* SlideCropService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropService.swift; sourceTree = "<group>"; };
+		EC4B48E8ED9FA97907692D9C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F002A0A0A0A0A0A0A0A0A003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0A933AA41F2D1EAC5702EAB6 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */,
+				062648169CC9BFB6D008A275 /* HeroCropIconView.swift */,
+				8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */,
+				94F8BBB8EC122AFE9C9E2E34 /* ResultThumbnailCell.swift */,
+				C6659011523E4294CAF4F376 /* ZoomableImageView.swift */,
+			);
+			name = Components;
+			path = SlideCrop/Components;
+			sourceTree = "<group>";
+		};
+		3815C65212D6202D9DA38FC7 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */,
+				77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */,
+				80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */,
+			);
+			name = ViewModels;
+			path = SlideCrop/ViewModels;
+			sourceTree = "<group>";
+		};
+		605DF5B4716C031491C2E153 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				70D4CFD669EB22F24902F9A8 /* SlideCropApp.swift */,
+			);
+			name = App;
+			path = SlideCrop/App;
+			sourceTree = "<group>";
+		};
+		641014F0FBCBFFA17076364F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B868432921A473756E539937 /* CompareView.swift */,
+				5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */,
+				5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */,
+				870E1134EBAB352472E6D72C /* ProcessingView.swift */,
+				C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */,
+				EC4B48E8ED9FA97907692D9C /* SettingsView.swift */,
+			);
+			name = Views;
+			path = SlideCrop/Views;
+			sourceTree = "<group>";
+		};
+		96EA493D9F38612452CCFE18 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C1F702CD96C2159E9056ADA8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */,
+				D24B0668612CA7E446EE759D /* SlideCropService.swift */,
+			);
+			name = Services;
+			path = SlideCrop/Services;
+			sourceTree = "<group>";
+		};
+		D261C6CA68078543BA4A9651 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3BE7219AA8109A749C19EF5E /* CropQuad.swift */,
+				4BC00C69EFA008B462372A49 /* ProcessedItem.swift */,
+				673A41447F8B34BE9198B72C /* ProcessingSettings.swift */,
+				5512314C55B71F36594470AD /* SlideCropError.swift */,
+			);
+			name = Models;
+			path = SlideCrop/Models;
+			sourceTree = "<group>";
+		};
+		DAECEBB80547A51C173BF0E1 = {
+			isa = PBXGroup;
+			children = (
+				605DF5B4716C031491C2E153 /* App */,
+				0A933AA41F2D1EAC5702EAB6 /* Components */,
+				D261C6CA68078543BA4A9651 /* Models */,
+				F003A0A0A0A0A0A0A0A0A001 /* Resources */,
+				C1F702CD96C2159E9056ADA8 /* Services */,
+				3815C65212D6202D9DA38FC7 /* ViewModels */,
+				641014F0FBCBFFA17076364F /* Views */,
+				96EA493D9F38612452CCFE18 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F003A0A0A0A0A0A0A0A0A001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */,
+				F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */,
+				F002A0A0A0A0A0A0A0A0A003 /* Info.plist */,
+				F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */,
+			);
+			name = Resources;
+			path = SlideCrop/Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		037E53AD075AA13E8715D1B7 /* SlideCrop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 58173A51C522374EA40DF4B8 /* Build configuration list for PBXNativeTarget "SlideCrop" */;
+			buildPhases = (
+				F004A0A0A0A0A0A0A0A0A001 /* Resources */,
+				3F010624A03FE26C2065ECEE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SlideCrop;
+			packageProductDependencies = (
+			);
+			productName = SlideCrop;
+			productReference = 236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2C2B9B992ECEA2F291A92DAB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					037E53AD075AA13E8715D1B7 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 6599C0BD506C7016456D371A /* Build configuration list for PBXProject "SlideCrop" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DAECEBB80547A51C173BF0E1;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				037E53AD075AA13E8715D1B7 /* SlideCrop */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F004A0A0A0A0A0A0A0A0A001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F001A0A0A0A0A0A0A0A0A001 /* Assets.xcassets in Resources */,
+				F001A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard in Resources */,
+				F001A0A0A0A0A0A0A0A0A003 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3F010624A03FE26C2065ECEE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4DED342F936CE8459E9EC42 /* CompareView.swift in Sources */,
+				D7623FDE7ECD843100B6037C /* CropAdjustmentView.swift in Sources */,
+				26E3E289D57F8F4D9DF66B24 /* CropOverlayView.swift in Sources */,
+				C042C4F74F0894E79F5E9977 /* CropQuad.swift in Sources */,
+				578F2054A9297A9E981FBE1E /* HeroCropIconView.swift in Sources */,
+				44CB1F68C9B4DD179EC23BE0 /* HomeView.swift in Sources */,
+				79A18CE60F04840D3AF10AF5 /* PhotoLibraryService.swift in Sources */,
+				611FED8B76776C7E8D1D305F /* PressScaleButtonStyle.swift in Sources */,
+				0BA03FEAE4A412322F86B374 /* ProcessedItem.swift in Sources */,
+				C57F2EDBBD683EDF8DD192AC /* ProcessingSettings.swift in Sources */,
+				1438AE31104AD72AC27E312F /* ProcessingView.swift in Sources */,
+				69E8B2FE0E91B9622CA44492 /* ProcessingViewModel.swift in Sources */,
+				BDE067D820D13857D3EBAF5F /* ResultThumbnailCell.swift in Sources */,
+				4C0DA11F095B26524AE50EB1 /* ResultsView.swift in Sources */,
+				680DC6A64DE63CEA75DF58BA /* ResultsViewModel.swift in Sources */,
+				C82D8F93E1FC8FB7AF0221CC /* SettingsView.swift in Sources */,
+				55D005FC4534DBFAEFF4487D /* SettingsViewModel.swift in Sources */,
+				3A05534881D1C4EC22EB99B7 /* SlideCropApp.swift in Sources */,
+				AF415689B2F6E4141750A29C /* SlideCropError.swift in Sources */,
+				D0D7DE9B3CE7CEBFEAFB0FB6 /* SlideCropService.swift in Sources */,
+				BDA637CE0526E7F524B20711 /* ZoomableImageView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		63ABBB545AFEA337C94195BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9D70E89F19E994B10EF7503C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = T83P6KMGQJ;
+				INFOPLIST_FILE = SlideCrop/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.newsira.slidecrop;
+				PRODUCT_NAME = SlideCrop;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C354BA74DB7F50A996FF3201 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F716C1657302C6FFB3A87EF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = T83P6KMGQJ;
+				INFOPLIST_FILE = SlideCrop/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.newsira.slidecrop;
+				PRODUCT_NAME = SlideCrop;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		58173A51C522374EA40DF4B8 /* Build configuration list for PBXNativeTarget "SlideCrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D70E89F19E994B10EF7503C /* Debug */,
+				F716C1657302C6FFB3A87EF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6599C0BD506C7016456D371A /* Build configuration list for PBXProject "SlideCrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C354BA74DB7F50A996FF3201 /* Debug */,
+				63ABBB545AFEA337C94195BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2C2B9B992ECEA2F291A92DAB /* Project object */;
+}

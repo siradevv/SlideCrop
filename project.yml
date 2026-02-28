@@ -1,0 +1,36 @@
+name: SlideCrop
+options:
+  minimumXcodeGenVersion: 2.44.0
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    IPHONEOS_DEPLOYMENT_TARGET: 17.0
+targets:
+  SlideCrop:
+    type: application
+    platform: iOS
+    deploymentTarget: 17.0
+    sources:
+      - path: SlideCrop/App
+      - path: SlideCrop/Views
+      - path: SlideCrop/Components
+      - path: SlideCrop/Services
+      - path: SlideCrop/Models
+      - path: SlideCrop/ViewModels
+    resources:
+      - path: SlideCrop/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.SlideCrop
+        PRODUCT_NAME: SlideCrop
+        INFOPLIST_FILE: SlideCrop/Resources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0
+        TARGETED_DEVICE_FAMILY: 1,2
+    scheme:
+      gatherCoverageData: false
