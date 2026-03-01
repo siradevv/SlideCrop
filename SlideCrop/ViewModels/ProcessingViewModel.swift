@@ -51,16 +51,50 @@ final class ProcessingViewModel: ObservableObject {
         processingTask = Task { [weak self] in
             guard let self else { return }
 
+            #if DEBUG
+            let debugBatchStart = ProcessInfo.processInfo.systemUptime
+            var debugItemTimeMsSum = 0.0
+            var debugReadyCount = 0
+            var debugReviewCount = 0
+            var debugFailedCount = 0
+
+            func registerStatus(_ status: ProcessedStatus) {
+                switch status {
+                case .auto:
+                    debugReadyCount += 1
+                case .review:
+                    debugReviewCount += 1
+                case .failed:
+                    debugFailedCount += 1
+                }
+            }
+
+            self.debugLog(
+                "batch_start run=\(runID.uuidString.prefix(8)) total=\(selectedPhotos.count) quality=\(settings.quality.rawValue) concurrency=1"
+            )
+            #endif
+
             for item in selectedPhotos {
                 if Task.isCancelled { break }
                 if self.currentRunID != runID { break }
 
                 if let identifier = item.assetIdentifier {
+                    #if DEBUG
+                    let debugItemStart = ProcessInfo.processInfo.systemUptime
+                    let debugThumbStart = ProcessInfo.processInfo.systemUptime
+                    #endif
+
                     self.currentAssetIdentifier = identifier
                     self.currentThumbnail = await self.photoLibraryService.requestThumbnail(
                         for: identifier,
                         targetSize: CGSize(width: 380, height: 380)
                     )
+
+                    #if DEBUG
+                    let debugThumbMs = Self.debugElapsedMilliseconds(since: debugThumbStart)
+                    let debugProcessStart = ProcessInfo.processInfo.systemUptime
+                    #endif
+
                     if Task.isCancelled { break }
                     if self.currentRunID != runID { break }
 
@@ -73,60 +107,103 @@ final class ProcessingViewModel: ObservableObject {
                     if self.currentRunID != runID { break }
                     self.processedItems.append(result)
                     self.processedCount += 1
+
+                    #if DEBUG
+                    let debugProcessMs = Self.debugElapsedMilliseconds(since: debugProcessStart)
+                    let debugItemMs = Self.debugElapsedMilliseconds(since: debugItemStart)
+                    debugItemTimeMsSum += debugItemMs
+                    registerStatus(result.status)
+                    self.debugLog(
+                        "item \(self.processedCount)/\(selectedPhotos.count) src=asset status=\(result.status.rawValue) total=\(Self.debugFormatMilliseconds(debugItemMs))ms thumb=\(Self.debugFormatMilliseconds(debugThumbMs))ms process=\(Self.debugFormatMilliseconds(debugProcessMs))ms"
+                    )
+                    #endif
                     continue
                 }
+
+                #if DEBUG
+                let debugItemStart = ProcessInfo.processInfo.systemUptime
+                #endif
 
                 let syntheticIdentifier = "picker-\(UUID().uuidString)"
                 self.currentAssetIdentifier = syntheticIdentifier
 
                 guard let provider = item.itemProvider else {
-                    self.processedItems.append(
-                        ProcessedItem(
-                            assetIdentifier: syntheticIdentifier,
-                            originalThumbnail: nil,
-                            processedThumbnail: nil,
-                            sourceImageURL: nil,
-                            processedImageURL: nil,
-                            confidenceScore: 0,
-                            status: .failed,
-                            cropQuad: nil,
-                            errorMessage: "Unable to import this selected photo.",
-                            canReplaceOriginal: false,
-                            canManualAdjust: false
-                        )
+                    let failedItem = ProcessedItem(
+                        assetIdentifier: syntheticIdentifier,
+                        originalThumbnail: nil,
+                        processedThumbnail: nil,
+                        sourceImageURL: nil,
+                        processedImageURL: nil,
+                        confidenceScore: 0,
+                        status: .failed,
+                        cropQuad: nil,
+                        errorMessage: "Unable to import this selected photo.",
+                        canReplaceOriginal: false,
+                        canManualAdjust: false
                     )
+                    self.processedItems.append(failedItem)
                     self.processedCount += 1
+
+                    #if DEBUG
+                    let debugItemMs = Self.debugElapsedMilliseconds(since: debugItemStart)
+                    debugItemTimeMsSum += debugItemMs
+                    registerStatus(failedItem.status)
+                    self.debugLog(
+                        "item \(self.processedCount)/\(selectedPhotos.count) src=itemProvider status=\(failedItem.status.rawValue) total=\(Self.debugFormatMilliseconds(debugItemMs))ms reason=missing_provider"
+                    )
+                    #endif
                     continue
                 }
 
+                #if DEBUG
+                let debugLoadStart = ProcessInfo.processInfo.systemUptime
+                #endif
                 let imageData = await Self.loadImageData(from: provider)
+                #if DEBUG
+                let debugLoadMs = Self.debugElapsedMilliseconds(since: debugLoadStart)
+                #endif
                 if Task.isCancelled { break }
                 if self.currentRunID != runID { break }
 
                 guard let imageData else {
-                    self.processedItems.append(
-                        ProcessedItem(
-                            assetIdentifier: syntheticIdentifier,
-                            originalThumbnail: nil,
-                            processedThumbnail: nil,
-                            sourceImageURL: nil,
-                            processedImageURL: nil,
-                            confidenceScore: 0,
-                            status: .failed,
-                            cropQuad: nil,
-                            errorMessage: "Unable to import this selected photo.",
-                            canReplaceOriginal: false,
-                            canManualAdjust: false
-                        )
+                    let failedItem = ProcessedItem(
+                        assetIdentifier: syntheticIdentifier,
+                        originalThumbnail: nil,
+                        processedThumbnail: nil,
+                        sourceImageURL: nil,
+                        processedImageURL: nil,
+                        confidenceScore: 0,
+                        status: .failed,
+                        cropQuad: nil,
+                        errorMessage: "Unable to import this selected photo.",
+                        canReplaceOriginal: false,
+                        canManualAdjust: false
                     )
+                    self.processedItems.append(failedItem)
                     self.processedCount += 1
+
+                    #if DEBUG
+                    let debugItemMs = Self.debugElapsedMilliseconds(since: debugItemStart)
+                    debugItemTimeMsSum += debugItemMs
+                    registerStatus(failedItem.status)
+                    self.debugLog(
+                        "item \(self.processedCount)/\(selectedPhotos.count) src=itemProvider status=\(failedItem.status.rawValue) total=\(Self.debugFormatMilliseconds(debugItemMs))ms load=\(Self.debugFormatMilliseconds(debugLoadMs))ms reason=load_failed"
+                    )
+                    #endif
                     continue
                 }
 
+                #if DEBUG
+                let debugThumbStart = ProcessInfo.processInfo.systemUptime
+                #endif
                 let fallbackThumbnail = Self.downsampledImage(
                     from: imageData,
                     maxPixelSize: 460
                 )
+                #if DEBUG
+                let debugThumbMs = Self.debugElapsedMilliseconds(since: debugThumbStart)
+                let debugProcessStart = ProcessInfo.processInfo.systemUptime
+                #endif
                 self.currentThumbnail = fallbackThumbnail
                 if Task.isCancelled { break }
                 if self.currentRunID != runID { break }
@@ -142,11 +219,32 @@ final class ProcessingViewModel: ObservableObject {
 
                 self.processedItems.append(result)
                 self.processedCount += 1
+
+                #if DEBUG
+                let debugProcessMs = Self.debugElapsedMilliseconds(since: debugProcessStart)
+                let debugItemMs = Self.debugElapsedMilliseconds(since: debugItemStart)
+                debugItemTimeMsSum += debugItemMs
+                registerStatus(result.status)
+                self.debugLog(
+                    "item \(self.processedCount)/\(selectedPhotos.count) src=itemProvider status=\(result.status.rawValue) total=\(Self.debugFormatMilliseconds(debugItemMs))ms load=\(Self.debugFormatMilliseconds(debugLoadMs))ms thumb=\(Self.debugFormatMilliseconds(debugThumbMs))ms process=\(Self.debugFormatMilliseconds(debugProcessMs))ms"
+                )
+                #endif
             }
 
             guard self.currentRunID == runID else { return }
             self.isProcessing = false
             self.processingTask = nil
+
+            #if DEBUG
+            let debugBatchMs = Self.debugElapsedMilliseconds(since: debugBatchStart)
+            let processed = self.processedCount
+            let avgWallPerImage = processed > 0 ? debugBatchMs / Double(processed) : 0
+            let avgTrackedItemMs = processed > 0 ? debugItemTimeMsSum / Double(processed) : 0
+            let imagesPerSecond = debugBatchMs > 0 ? (Double(processed) / (debugBatchMs / 1000.0)) : 0
+            self.debugLog(
+                "batch_end run=\(runID.uuidString.prefix(8)) processed=\(processed)/\(selectedPhotos.count) ready=\(debugReadyCount) review=\(debugReviewCount) failed=\(debugFailedCount) total=\(Self.debugFormatMilliseconds(debugBatchMs))ms avgWall=\(Self.debugFormatMilliseconds(avgWallPerImage))ms avgItem=\(Self.debugFormatMilliseconds(avgTrackedItemMs))ms ips=\(String(format: "%.2f", imagesPerSecond)) cancelled=\(Task.isCancelled)"
+            )
+            #endif
         }
     }
 
@@ -203,4 +301,18 @@ final class ProcessingViewModel: ObservableObject {
             try? FileManager.default.removeItem(at: url)
         }
     }
+
+    #if DEBUG
+    private static func debugElapsedMilliseconds(since startUptime: TimeInterval) -> Double {
+        (ProcessInfo.processInfo.systemUptime - startUptime) * 1000.0
+    }
+
+    private static func debugFormatMilliseconds(_ value: Double) -> String {
+        String(format: "%.1f", value)
+    }
+
+    private func debugLog(_ message: String) {
+        print("[SlideCrop][Processing] \(message)")
+    }
+    #endif
 }
