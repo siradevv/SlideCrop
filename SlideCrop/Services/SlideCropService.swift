@@ -4,13 +4,13 @@ import CoreImage.CIFilterBuiltins
 import Foundation
 import ImageIO
 import Photos
-import QuartzCore
 import UIKit
 import UniformTypeIdentifiers
 import Vision
 
 final class SlideCropService {
     private let ciContext = CIContext(options: [.cacheIntermediates: false])
+    private let confidenceThreshold = 0.68
 
     func processAsset(
         assetIdentifier: String,
@@ -132,22 +132,15 @@ final class SlideCropService {
         )
         return try await runOnProcessingQueue {
             let cleaned = quad.clamped()
-            let perspectiveStart = self.debugTimestamp()
             guard var corrected = self.applyPerspectiveCorrection(to: fullImage, quad: cleaned) else {
                 throw SlideCropError.perspectiveFailed
             }
-            self.debugLogTiming(step: "perspective", start: perspectiveStart, assetIdentifier: assetIdentifier)
 
             if settings.enhanceReadability {
-                let enhancementStart = self.debugTimestamp()
-                corrected = self.applyEnhancementMaximumClean(to: corrected, context: self.ciContext)
-                self.debugLogTiming(step: "enhancement", start: enhancementStart, assetIdentifier: assetIdentifier)
+                corrected = self.applyReadabilityEnhancement(to: corrected)
             }
 
-            self.debugLogCorrectedExtent(corrected.extent, assetIdentifier: assetIdentifier)
-            let exportStart = self.debugTimestamp()
             let outputURL = try self.exportJPEG(image: corrected, quality: 0.9)
-            self.debugLogTiming(step: "jpeg-export", start: exportStart, assetIdentifier: assetIdentifier)
             let thumbnail = self.makeThumbnail(from: corrected, maxLongEdge: 520)
 
             return ProcessedItem(
@@ -215,66 +208,22 @@ final class SlideCropService {
         }
 
         let scoredCandidates = quads.compactMap { scoreCandidate($0, in: detectionImage) }
-        let sortedCandidates = scoredCandidates.sorted { $0.totalScore > $1.totalScore }
-        guard let topCandidate = sortedCandidates.first else {
+        guard let best = scoredCandidates.max(by: { $0.totalScore < $1.totalScore }) else {
             throw SlideCropError.perspectiveFailed
         }
 
-        let refinedCandidates = refinementVariants(for: topCandidate.quad)
-            .compactMap { scoreCandidate($0, in: detectionImage) }
-        guard let best = bestCandidate(in: refinedCandidates) else {
-            throw SlideCropError.perspectiveFailed
-        }
-
-        let refinementChanged = best.quad != topCandidate.quad
-        let secondBestScore = sortedCandidates.count > 1 ? sortedCandidates[1].totalScore : 0
-        let gap = best.totalScore - secondBestScore
-
-        let ambiguous = gap < 0.06
-        let borderRisk = best.edgeMarginScore < 0.35
-        let geometryWeak = best.skewScore < 0.78 || best.aspectScore < 0.55
-        let extremeArea = best.areaRatio < 0.18 || best.areaRatio > 0.90
-
-        let defaultAuto =
-            best.totalScore >= 0.62 &&
-            !ambiguous &&
-            !borderRisk &&
-            !geometryWeak &&
-            !extremeArea
-
-        let goodCropRescue =
-            best.totalScore >= 0.56 &&
-            best.skewScore >= 0.88 &&
-            best.aspectScore >= 0.72 &&
-            best.edgeMarginScore >= 0.38 &&
-            gap >= 0.04
-
-        let status: ProcessedStatus = (defaultAuto || goodCropRescue) ? .auto : .review
-        debugLogDecision(
-            assetIdentifier: assetIdentifier,
-            best: best,
-            gap: gap,
-            status: status,
-            refinementChanged: refinementChanged
-        )
-
-        let perspectiveStart = debugTimestamp()
         guard var corrected = applyPerspectiveCorrection(to: fullImage, quad: best.quad) else {
             throw SlideCropError.perspectiveFailed
         }
-        debugLogTiming(step: "perspective", start: perspectiveStart, assetIdentifier: assetIdentifier)
 
         if settings.enhanceReadability {
-            let enhancementStart = debugTimestamp()
-            corrected = applyEnhancementMaximumClean(to: corrected, context: ciContext)
-            debugLogTiming(step: "enhancement", start: enhancementStart, assetIdentifier: assetIdentifier)
+            corrected = applyReadabilityEnhancement(to: corrected)
         }
 
-        debugLogCorrectedExtent(corrected.extent, assetIdentifier: assetIdentifier)
-        let exportStart = debugTimestamp()
         let outputURL = try exportJPEG(image: corrected, quality: 0.9)
-        debugLogTiming(step: "jpeg-export", start: exportStart, assetIdentifier: assetIdentifier)
         let processedThumbnail = makeThumbnail(from: corrected, maxLongEdge: 520)
+
+        let status: ProcessedStatus = best.totalScore >= confidenceThreshold ? .auto : .review
 
         return ProcessedItem(
             assetIdentifier: assetIdentifier,
@@ -321,7 +270,7 @@ final class SlideCropService {
             return nil
         }
 
-        let areaRatio = clamp01(Double(quad.area))
+        let areaRatio = max(0, min(1, Double(quad.area)))
         let areaScore = normalizedAreaScore(for: areaRatio)
 
         let aspect = Double(corrected.extent.width / max(corrected.extent.height, 1))
@@ -333,97 +282,22 @@ final class SlideCropService {
 
         let skewScore = skewSanityScore(for: quad)
 
-        let textScore = textDensityBonus(in: corrected)
-        let edgeMarginScore = edgeMarginScore(for: quad)
+        let textBonus = textDensityBonus(in: corrected)
 
-        let weighted = (areaScore * 0.18)
-            + (aspectScore * 0.24)
-            + (centerednessScore * 0.10)
-            + (skewScore * 0.20)
-            + (textScore * 0.16)
-            + (edgeMarginScore * 0.12)
-        let totalScore = clamp01(weighted)
+        let weighted = (areaScore * 0.36)
+            + (aspectScore * 0.25)
+            + (centerednessScore * 0.18)
+            + (skewScore * 0.16)
+            + (textBonus * 0.05)
 
         return CandidateScore(
             quad: quad,
-            areaRatio: areaRatio,
-            areaScore: areaScore,
-            aspectScore: aspectScore,
-            centerednessScore: centerednessScore,
-            skewScore: skewScore,
-            textScore: textScore,
-            edgeMarginScore: edgeMarginScore,
-            totalScore: totalScore
+            totalScore: max(0, min(1, weighted))
         )
     }
 
     private func normalizedAreaScore(for areaRatio: Double) -> Double {
-        clamp01(1 - abs(areaRatio - 0.58) / 0.48)
-    }
-
-    private func edgeMarginScore(for quad: CropQuad) -> Double {
-        let minMargin = quad.points
-            .map { point in
-                min(
-                    Double(point.x),
-                    Double(point.y),
-                    Double(1 - point.x),
-                    Double(1 - point.y)
-                )
-            }
-            .min() ?? 0
-        return clamp01((minMargin - 0.015) / 0.075)
-    }
-
-    private func clamp01(_ value: Double) -> Double {
-        max(0, min(1, value))
-    }
-
-    private func refinementVariants(for quad: CropQuad) -> [CropQuad] {
-        let original = quad.clamped()
-        let inset15 = applyInsets(to: original, top: 0.015, right: 0.015, bottom: 0.015, left: 0.015)
-        let inset30 = applyInsets(to: original, top: 0.030, right: 0.030, bottom: 0.030, left: 0.030)
-        let bottomFocused = applyInsets(to: original, top: 0.005, right: 0, bottom: 0.025, left: 0)
-        let outward15 = applyInsets(to: original, top: -0.015, right: -0.015, bottom: -0.015, left: -0.015)
-        return [original, inset15, inset30, bottomFocused, outward15]
-    }
-
-    private func applyInsets(
-        to quad: CropQuad,
-        top: CGFloat,
-        right: CGFloat,
-        bottom: CGFloat,
-        left: CGFloat
-    ) -> CropQuad {
-        CropQuad(
-            topLeft: CGPoint(
-                x: quad.topLeft.x + left,
-                y: quad.topLeft.y + top
-            ),
-            topRight: CGPoint(
-                x: quad.topRight.x - right,
-                y: quad.topRight.y + top
-            ),
-            bottomRight: CGPoint(
-                x: quad.bottomRight.x - right,
-                y: quad.bottomRight.y - bottom
-            ),
-            bottomLeft: CGPoint(
-                x: quad.bottomLeft.x + left,
-                y: quad.bottomLeft.y - bottom
-            )
-        ).clamped()
-    }
-
-    private func bestCandidate(in candidates: [CandidateScore]) -> CandidateScore? {
-        var best: CandidateScore?
-        for candidate in candidates {
-            if let current = best, current.totalScore >= candidate.totalScore {
-                continue
-            }
-            best = candidate
-        }
-        return best
+        max(0, min(1, (areaRatio - 0.10) / 0.78))
     }
 
     private func aspectClosenessScore(_ aspect: Double) -> Double {
@@ -522,74 +396,12 @@ final class SlideCropService {
         return filter.outputImage
     }
 
-    private func applyEnhancementMaximumClean(
-        to image: CIImage,
-        context: CIContext
-    ) -> CIImage {
-        _ = context
-        var working = image
-        // A) Fast global tone shaping for readability
-        let controls = CIFilter.colorControls()
-        controls.inputImage = working
-        controls.contrast = 1.14
-        controls.brightness = 0.02
-        controls.saturation = 1.01
-        working = controls.outputImage ?? working
-
-        // B) Conservative highlight compression / shadow lift
-        let hs = CIFilter.highlightShadowAdjust()
-        hs.inputImage = working
-        hs.highlightAmount = 0.90
-        hs.shadowAmount = 0.10
-        working = hs.outputImage ?? working
-
-        // C) Mild luminance sharpening for text edges
-        let sharpen = CIFilter.sharpenLuminance()
-        sharpen.inputImage = working
-        sharpen.sharpness = 0.45
-        working = sharpen.outputImage ?? working
-
-        return working
-    }
-
-    private func debugTimestamp() -> CFTimeInterval {
-        #if DEBUG
-        CACurrentMediaTime()
-        #else
-        0
-        #endif
-    }
-
-    private func debugLogTiming(step: String, start: CFTimeInterval, assetIdentifier: String) {
-        #if DEBUG
-        guard start > 0 else { return }
-        let elapsedMs = (CACurrentMediaTime() - start) * 1000
-        print(
-            "SlideCropTiming[\(assetIdentifier)] \(step): \(String(format: "%.1f", elapsedMs))ms"
-        )
-        #endif
-    }
-
-    private func debugLogCorrectedExtent(_ extent: CGRect, assetIdentifier: String) {
-        #if DEBUG
-        print(
-            "SlideCropTiming[\(assetIdentifier)] corrected-extent: \(Int(extent.width.rounded()))x\(Int(extent.height.rounded()))"
-        )
-        #endif
-    }
-
-    private func debugLogDecision(
-        assetIdentifier: String,
-        best: CandidateScore,
-        gap: Double,
-        status: ProcessedStatus,
-        refinementChanged: Bool
-    ) {
-        #if DEBUG
-        print(
-            "SlideCropDecision[\(assetIdentifier)] total=\(String(format: "%.3f", best.totalScore)) gap=\(String(format: "%.3f", gap)) area=\(String(format: "%.3f", best.areaScore)) aspect=\(String(format: "%.3f", best.aspectScore)) skew=\(String(format: "%.3f", best.skewScore)) edgeMargin=\(String(format: "%.3f", best.edgeMarginScore)) text=\(String(format: "%.3f", best.textScore)) status=\(status.rawValue) refinementChanged=\(refinementChanged)"
-        )
-        #endif
+    private func applyReadabilityEnhancement(to image: CIImage) -> CIImage {
+        let filter = CIFilter.colorControls()
+        filter.inputImage = image
+        filter.contrast = 1.05
+        filter.brightness = 0.02
+        return filter.outputImage ?? image
     }
 
     private func resized(image: CIImage, maxLongEdge: CGFloat) -> CIImage {
@@ -724,12 +536,5 @@ final class SlideCropService {
 
 private struct CandidateScore {
     let quad: CropQuad
-    let areaRatio: Double
-    let areaScore: Double
-    let aspectScore: Double
-    let centerednessScore: Double
-    let skewScore: Double
-    let textScore: Double
-    let edgeMarginScore: Double
     let totalScore: Double
 }
