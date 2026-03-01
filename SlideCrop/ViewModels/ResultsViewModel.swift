@@ -11,27 +11,33 @@ final class ResultsViewModel: ObservableObject {
         self.photoLibraryService = photoLibraryService
     }
 
-    func saveAsNewImages(from items: [ProcessedItem]) async {
-        guard !isSaving else { return }
+    @discardableResult
+    func saveAsNewImages(from items: [ProcessedItem]) async -> Int {
+        guard !isSaving else { return 0 }
+        let exportableItems = items.filter { $0.status != .failed }
+        guard !exportableItems.isEmpty else { return 0 }
 
         isSaving = true
         defer { isSaving = false }
 
         do {
-            try await photoLibraryService.saveNewImages(items: items.filter { $0.status != .failed })
+            try await photoLibraryService.saveNewImages(items: exportableItems)
             toastMessage = "Saved as new images."
+            return exportableItems.count
         } catch {
             toastMessage = "Save failed: \(error.localizedDescription)"
+            return 0
         }
     }
 
-    func replaceOriginals(with items: [ProcessedItem]) async {
-        guard !isSaving else { return }
+    @discardableResult
+    func replaceOriginals(with items: [ProcessedItem]) async -> Int {
+        guard !isSaving else { return 0 }
 
         let replaceLinkedItems = items.filter { $0.status != .failed && $0.canReplaceOriginal }
         guard !replaceLinkedItems.isEmpty else {
             toastMessage = "These selections were imported without direct Photo Library linkage, so originals cannot be replaced. Re-select from Photos with Full Access."
-            return
+            return 0
         }
 
         isSaving = true
@@ -46,8 +52,10 @@ final class ResultsViewModel: ObservableObject {
             } else {
                 toastMessage = "Replaced originals with reversible edits."
             }
+            return replacedCount
         } catch {
             toastMessage = "Replace failed: \(error.localizedDescription)"
+            return 0
         }
     }
 }

@@ -14,16 +14,28 @@ private enum ResultDestination: Identifiable {
     }
 }
 
+private enum SaveAction {
+    case saveAsNew
+    case replaceOriginals
+}
+
 struct ResultsView: View {
     @ObservedObject var processingViewModel: ProcessingViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @StateObject private var resultsViewModel = ResultsViewModel()
+    @StateObject private var purchaseManager = PurchaseManager()
 
     @State private var selectedDestination: ResultDestination?
+    @State private var showPaywall = false
+    @State private var pendingSaveAction: SaveAction?
+    @State private var paywallRequestedCount = 0
     @State private var showSaveAlert = false
     @State private var selectedIDs: Set<UUID> = []
     @State private var hasInitializedSelection = false
     @State private var previousStatusByID: [UUID: ProcessedStatus] = [:]
+    @State private var remainingFreeSaves = 0
+
+    private let freeSaveCounter = FreeSaveCounter()
 
     private let columns = [GridItem(.adaptive(minimum: 150), spacing: 14)]
 
@@ -92,11 +104,28 @@ struct ResultsView: View {
                 }
             }
         }
+        .sheet(isPresented: $showPaywall, onDismiss: clearPendingPaywallState) {
+            PaywallView(
+                purchaseManager: purchaseManager,
+                remainingFreeSaves: remainingFreeSaves,
+                requestedCount: paywallRequestedCount
+            )
+        }
         .onAppear {
+            refreshRemainingFreeSaves()
             initializeSelectionIfNeeded(with: processingViewModel.processedItems)
         }
         .onReceive(processingViewModel.$processedItems) { items in
             syncSelection(with: items)
+        }
+        .onChange(of: purchaseManager.isUnlocked) { _, isUnlocked in
+            refreshRemainingFreeSaves()
+            guard isUnlocked, let action = pendingSaveAction else { return }
+            showPaywall = false
+            pendingSaveAction = nil
+            Task {
+                await runSaveAction(action)
+            }
         }
         .onChange(of: resultsViewModel.toastMessage) { _, value in
             showSaveAlert = value != nil
@@ -154,7 +183,7 @@ struct ResultsView: View {
             HStack(spacing: 12) {
                 Button("Save as New Images") {
                     Task {
-                        await resultsViewModel.saveAsNewImages(from: selectedExportableItems)
+                        await handleSaveAsNewTap()
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -164,7 +193,7 @@ struct ResultsView: View {
 
                 Button("Replace Originals") {
                     Task {
-                        await resultsViewModel.replaceOriginals(with: selectedReplaceableItems)
+                        await handleReplaceOriginalsTap()
                     }
                 }
                 .buttonStyle(.bordered)
@@ -276,6 +305,58 @@ struct ResultsView: View {
         }
 
         previousStatusByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0.status) })
+    }
+
+    private func handleSaveAsNewTap() async {
+        let requestedCount = selectedExportableItems.count
+        guard requestedCount > 0 else { return }
+        guard !presentPaywallIfNeeded(requestedCount: requestedCount, action: .saveAsNew) else { return }
+        await runSaveAction(.saveAsNew)
+    }
+
+    private func handleReplaceOriginalsTap() async {
+        let requestedCount = selectedReplaceableItems.count
+        guard requestedCount > 0 else { return }
+        guard !presentPaywallIfNeeded(requestedCount: requestedCount, action: .replaceOriginals) else { return }
+        await runSaveAction(.replaceOriginals)
+    }
+
+    private func runSaveAction(_ action: SaveAction) async {
+        let savedCount: Int
+        switch action {
+        case .saveAsNew:
+            savedCount = await resultsViewModel.saveAsNewImages(from: selectedExportableItems)
+        case .replaceOriginals:
+            savedCount = await resultsViewModel.replaceOriginals(with: selectedReplaceableItems)
+        }
+        registerFreeSaveUsage(savedCount)
+    }
+
+    private func presentPaywallIfNeeded(requestedCount: Int, action: SaveAction) -> Bool {
+        guard !purchaseManager.isUnlocked else { return false }
+        refreshRemainingFreeSaves()
+        guard requestedCount > remainingFreeSaves else { return false }
+
+        pendingSaveAction = action
+        paywallRequestedCount = requestedCount
+        showPaywall = true
+        return true
+    }
+
+    private func registerFreeSaveUsage(_ count: Int) {
+        guard count > 0, !purchaseManager.isUnlocked else { return }
+        freeSaveCounter.consumeSaves(count)
+        refreshRemainingFreeSaves()
+    }
+
+    private func refreshRemainingFreeSaves() {
+        remainingFreeSaves = freeSaveCounter.remainingFreeSaves
+    }
+
+    private func clearPendingPaywallState() {
+        pendingSaveAction = nil
+        paywallRequestedCount = 0
+        refreshRemainingFreeSaves()
     }
 
     private func item(for id: UUID) -> ProcessedItem? {
