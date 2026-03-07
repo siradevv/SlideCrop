@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject var purchaseManager: PurchaseManager
 
     let remainingFreeSaves: Int
@@ -128,6 +129,15 @@ struct PaywallView: View {
             }
             .onAppear {
                 heroVisible = true
+                Task {
+                    await purchaseManager.loadProduct()
+                }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                guard newPhase == .active else { return }
+                Task {
+                    await purchaseManager.loadProduct()
+                }
             }
         }
     }

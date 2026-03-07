@@ -256,6 +256,36 @@ final class ProcessingViewModel: ObservableObject {
             )
         }
 
+        if let imageData = item.imageData {
+            let syntheticIdentifier = "camera-\(UUID().uuidString)"
+
+            let thumbStart = ProcessInfo.processInfo.systemUptime
+            let fallbackThumbnail = downsampledImage(from: imageData, maxPixelSize: 460)
+            let thumbMs = elapsedMilliseconds(since: thumbStart)
+
+            let processStart = ProcessInfo.processInfo.systemUptime
+            let result = await cropService.processImageData(
+                imageData,
+                sourceIdentifier: syntheticIdentifier,
+                settings: settings,
+                fallbackThumbnail: fallbackThumbnail
+            )
+            let processMs = elapsedMilliseconds(since: processStart)
+
+            return IndexedProcessingResult(
+                index: index,
+                displayIdentifier: syntheticIdentifier,
+                previewThumbnail: fallbackThumbnail,
+                item: result,
+                sourceLabel: "camera",
+                loadMs: 0,
+                thumbnailMs: thumbMs,
+                processMs: processMs,
+                totalMs: elapsedMilliseconds(since: itemStart),
+                note: nil
+            )
+        }
+
         let syntheticIdentifier = "picker-\(UUID().uuidString)"
         guard let provider = item.itemProvider else {
             return IndexedProcessingResult(

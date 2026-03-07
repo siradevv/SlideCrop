@@ -22,6 +22,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SlideCrop needs camera access to capture slide photos for processing.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>SlideCrop saves processed slides back to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

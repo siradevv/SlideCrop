@@ -15,6 +15,10 @@ final class PhotoLibraryService {
         PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
 
+    func canAccessAsset(with localIdentifier: String) -> Bool {
+        fetchAsset(with: localIdentifier) != nil
+    }
+
     func requestThumbnail(for localIdentifier: String, targetSize: CGSize) async -> UIImage? {
         guard let asset = fetchAsset(with: localIdentifier) else { return nil }
 
@@ -144,12 +148,8 @@ final class PhotoLibraryService {
     }
 
     @MainActor
-    func presentLimitedLibraryPicker() {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
-            return
-        }
-        PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: root)
+    func presentLimitedLibraryPicker(from presenter: UIViewController) {
+        PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: presenter)
     }
 
     private func fetchAsset(with localIdentifier: String) -> PHAsset? {

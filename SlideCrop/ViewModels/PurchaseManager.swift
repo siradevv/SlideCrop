@@ -7,6 +7,7 @@ final class PurchaseManager: ObservableObject {
 
     @Published var isUnlocked: Bool
     @Published var product: Product?
+    @Published private(set) var storefrontCountryCode: String?
 
     private let defaults: UserDefaults
     private let cachedUnlockKey = "isUnlimitedUnlockedCached"
@@ -14,6 +15,7 @@ final class PurchaseManager: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.isUnlocked = defaults.bool(forKey: cachedUnlockKey)
+        self.storefrontCountryCode = SKPaymentQueue.default().storefront?.countryCode
 
         Task {
             await refreshEntitlements()
@@ -22,6 +24,7 @@ final class PurchaseManager: ObservableObject {
     }
 
     func loadProduct() async {
+        storefrontCountryCode = SKPaymentQueue.default().storefront?.countryCode
         do {
             let products = try await Product.products(for: [Self.unlimitedProductID])
             product = products.first
@@ -85,6 +88,17 @@ final class PurchaseManager: ObservableObject {
         defaults.set(unlocked, forKey: cachedUnlockKey)
     }
 
+    var storefrontRegionName: String? {
+        guard let storefrontCountryCode else { return nil }
+        return Locale.current.localizedString(forRegionCode: storefrontCountryCode) ?? storefrontCountryCode
+    }
+
+    var shouldShowStorefrontHint: Bool {
+        guard let storefrontCountryCode else { return false }
+        guard let regionCode = Locale.current.region?.identifier else { return false }
+        return storefrontCountryCode.caseInsensitiveCompare(regionCode) != .orderedSame
+    }
+
     private func verifiedTransaction<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case let .verified(transaction):
@@ -93,6 +107,7 @@ final class PurchaseManager: ObservableObject {
             throw PurchaseError.unverified
         }
     }
+
 }
 
 enum PurchaseError: LocalizedError, Equatable {
