@@ -16,7 +16,7 @@ struct ResultThumbnailCell: View {
                             .scaledToFill()
                     } else {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(0.58))
+                            .fill(SlideCropTheme.placeholderFill)
                             .overlay {
                                 Image(systemName: "photo")
                                     .font(.title3)
@@ -30,7 +30,7 @@ struct ResultThumbnailCell: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(
-                            isSelected ? SlideCropTheme.tint : Color.white.opacity(0.45),
+                            isSelected ? SlideCropTheme.tint : SlideCropTheme.imagePaneStroke,
                             lineWidth: 2.2
                         )
                 )

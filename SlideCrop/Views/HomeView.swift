@@ -115,7 +115,7 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.5), in: Capsule())
+                        .background(SlideCropTheme.mutedCapsuleBackground, in: Capsule())
                     }
 
                     Spacer(minLength: 18)
