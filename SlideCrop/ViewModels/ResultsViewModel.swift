@@ -22,7 +22,7 @@ final class ResultsViewModel: ObservableObject {
 
         do {
             try await photoLibraryService.saveNewImages(items: exportableItems)
-            toastMessage = "Saved as new images."
+            toastMessage = "Saved \(exportableItems.count) image(s) as new photos."
             return exportableItems.count
         } catch {
             toastMessage = "Save failed: \(error.localizedDescription)"
@@ -50,7 +50,7 @@ final class ResultsViewModel: ObservableObject {
             if replacedCount == 0 {
                 toastMessage = "No replaceable originals found. Re-select photos from the library and ensure full Photos access."
             } else {
-                toastMessage = "Replaced originals with reversible edits."
+                toastMessage = "Replaced \(replacedCount) original photo(s) with reversible edits."
             }
             return replacedCount
         } catch {
