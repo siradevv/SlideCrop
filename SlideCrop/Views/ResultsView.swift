@@ -34,6 +34,9 @@ struct ResultsView: View {
     @State private var hasInitializedSelection = false
     @State private var previousStatusByID: [UUID: ProcessedStatus] = [:]
     @State private var remainingFreeSaves = 0
+    @State private var retryingIDs: Set<UUID> = []
+
+    private let retryService = SlideCropService()
 
     private let freeSaveCounter = FreeSaveCounter()
 
@@ -50,6 +53,10 @@ struct ResultsView: View {
 
                 if !needsReviewItems.isEmpty {
                     section(title: "Needs Review", ids: needsReviewItems)
+                }
+
+                if !failedItems.isEmpty {
+                    section(title: "Failed", ids: failedItems)
                 }
 
                 actionPanel
@@ -149,7 +156,13 @@ struct ResultsView: View {
 
     private var needsReviewItems: [UUID] {
         processingViewModel.processedItems
-            .filter { $0.status != .auto }
+            .filter { $0.status == .review }
+            .map(\.id)
+    }
+
+    private var failedItems: [UUID] {
+        processingViewModel.processedItems
+            .filter { $0.status == .failed }
             .map(\.id)
     }
 
@@ -265,6 +278,11 @@ struct ResultsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                if title == "Failed" {
+                    Text("Try Retry Best Quality. If still failing, use Adjust Crop for manual recovery.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             LazyVGrid(columns: columns, spacing: 14) {
@@ -279,10 +297,23 @@ struct ResultsView: View {
                             .onTapGesture {
                                 openItem(item, id: id)
                             }
+                            .overlay(alignment: .center) {
+                                if retryingIDs.contains(id) {
+                                    ProgressView()
+                                        .padding(8)
+                                        .background(.ultraThinMaterial, in: Capsule())
+                                }
+                            }
                             .contextMenu {
                                 Button("Open Compare", systemImage: "rectangle.split.2x1") { selectedDestination = .compare(id) }
                                 if item.canManualAdjust {
                                     Button("Adjust Crop", systemImage: "crop") { selectedDestination = .adjust(id) }
+                                }
+                                if item.status != .auto {
+                                    Button("Retry Best Quality", systemImage: "arrow.clockwise") {
+                                        Task { await retryItem(id: id) }
+                                    }
+                                    .disabled(retryingIDs.contains(id))
                                 }
                                 Button(selectedIDs.contains(id) ? "Deselect" : "Select", systemImage: selectedIDs.contains(id) ? "checkmark.circle" : "circle") { toggleSelection(for: id) }
                             }
@@ -384,6 +415,8 @@ struct ResultsView: View {
         case .replaceOriginals:
             savedCount = await resultsViewModel.replaceOriginals(with: selectedReplaceableItems)
         }
+        let actionName: String
+        switch action { case .saveAsNew: actionName = "saveAsNew"; case .replaceOriginals: actionName = "replace" }
         registerFreeSaveUsage(savedCount)
     }
 
@@ -412,6 +445,45 @@ struct ResultsView: View {
         pendingSaveAction = nil
         paywallRequestedCount = 0
         refreshRemainingFreeSaves()
+    }
+
+
+    private func retryItem(id: UUID) async {
+        guard let index = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) else { return }
+        var item = processingViewModel.processedItems[index]
+        guard !retryingIDs.contains(id) else { return }
+        retryingIDs.insert(id)
+        defer { retryingIDs.remove(id) }
+
+        let retrySettings = ProcessingSettings(enhanceReadability: true, quality: .best)
+        let updated: ProcessedItem
+
+        if let dataURL = item.sourceImageURL,
+           let data = try? Data(contentsOf: dataURL) {
+            updated = await retryService.processImageData(
+                data,
+                sourceIdentifier: item.assetIdentifier,
+                settings: retrySettings,
+                fallbackThumbnail: item.originalThumbnail
+            )
+        } else {
+            updated = await retryService.processAsset(
+                assetIdentifier: item.assetIdentifier,
+                settings: retrySettings,
+                fallbackThumbnail: item.originalThumbnail
+            )
+        }
+
+        var merged = updated
+        merged.id = item.id
+        processingViewModel.processedItems[index] = merged
+
+        if merged.processedImageURL != nil && merged.status != .failed {
+            selectedIDs.insert(merged.id)
+            resultsViewModel.toastMessage = "Retry succeeded for one item."
+        } else {
+            resultsViewModel.toastMessage = "Retry still failed. Try Adjust Crop for manual recovery."
+        }
     }
 
     private func item(for id: UUID) -> ProcessedItem? {

@@ -36,6 +36,8 @@ struct ResultThumbnailCell: View {
                 )
                 .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
 
+                statusBadge
+                    .padding(8)
             }
 
             if item.status != .auto {
@@ -51,4 +53,26 @@ struct ResultThumbnailCell: View {
             isVisible = true
         }
     }
+
+        private var statusBadge: some View {
+        let tuple: (String, Color) = {
+            switch item.status {
+            case .auto:
+                return ("Ready", SlideCropTheme.readyBadge)
+            case .review:
+                return ("Needs Review", SlideCropTheme.reviewBadge)
+            case .failed:
+                return ("Failed", SlideCropTheme.failedBadge)
+            }
+        }()
+
+        return Text(tuple.0)
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(tuple.1.opacity(0.16), in: Capsule())
+            .overlay(Capsule().stroke(tuple.1.opacity(0.35), lineWidth: 1))
+            .foregroundStyle(tuple.1)
+    }
 }
+
