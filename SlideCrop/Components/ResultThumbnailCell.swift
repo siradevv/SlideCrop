@@ -42,8 +42,11 @@ struct ResultThumbnailCell: View {
 
             if item.status != .auto {
                 Text("Confidence \(Int(item.confidenceScore * 100))%")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial, in: Capsule())
             }
         }
         .opacity(isVisible ? 1 : 0)
@@ -70,9 +73,11 @@ struct ResultThumbnailCell: View {
             .font(.caption2.weight(.semibold))
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(tuple.1.opacity(0.16), in: Capsule())
-            .overlay(Capsule().stroke(tuple.1.opacity(0.35), lineWidth: 1))
-            .foregroundStyle(tuple.1)
+            .padding(.horizontal, 2)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().stroke(tuple.1.opacity(0.55), lineWidth: 1.1))
+            .shadow(color: .black.opacity(0.22), radius: 3, y: 1)
+            .foregroundStyle(.primary)
     }
 }
 
