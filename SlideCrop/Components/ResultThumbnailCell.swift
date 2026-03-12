@@ -58,26 +58,25 @@ struct ResultThumbnailCell: View {
     }
 
         private var statusBadge: some View {
-        let tuple: (String, Color) = {
+        let tuple: (String, Color, Color) = {
             switch item.status {
             case .auto:
-                return ("Ready", SlideCropTheme.readyBadge)
+                return ("Ready", SlideCropTheme.readyBadge, .white)
             case .review:
-                return ("Needs Review", SlideCropTheme.reviewBadge)
+                return ("Needs Review", SlideCropTheme.reviewBadge, .white)
             case .failed:
-                return ("Failed", SlideCropTheme.failedBadge)
+                return ("Failed", SlideCropTheme.failedBadge, .white)
             }
         }()
 
         return Text(tuple.0)
-            .font(.caption2.weight(.semibold))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 2)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(tuple.1.opacity(0.55), lineWidth: 1.1))
-            .shadow(color: .black.opacity(0.22), radius: 3, y: 1)
-            .foregroundStyle(.primary)
+            .font(.caption2.weight(.bold))
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(tuple.1, in: Capsule())
+            .overlay(Capsule().stroke(Color.black.opacity(0.16), lineWidth: 0.8))
+            .shadow(color: .black.opacity(0.20), radius: 2, y: 1)
+            .foregroundStyle(tuple.2)
     }
 }
 
