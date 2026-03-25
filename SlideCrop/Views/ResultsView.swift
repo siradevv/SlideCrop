@@ -34,6 +34,9 @@ struct ResultsView: View {
     @State private var hasInitializedSelection = false
     @State private var previousStatusByID: [UUID: ProcessedStatus] = [:]
     @State private var remainingFreeSaves = 0
+    @State private var retryingIDs: Set<UUID> = []
+
+    private let retryService = SlideCropService()
 
     private let freeSaveCounter = FreeSaveCounter()
 
@@ -42,12 +45,18 @@ struct ResultsView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
+                resultsSummaryCard
+
                 if !readyItems.isEmpty {
                     section(title: "Ready", ids: readyItems)
                 }
 
                 if !needsReviewItems.isEmpty {
                     section(title: "Needs Review", ids: needsReviewItems)
+                }
+
+                if !failedItems.isEmpty {
+                    section(title: "Failed", ids: failedItems)
                 }
 
                 actionPanel
@@ -147,7 +156,13 @@ struct ResultsView: View {
 
     private var needsReviewItems: [UUID] {
         processingViewModel.processedItems
-            .filter { $0.status != .auto }
+            .filter { $0.status == .review }
+            .map(\.id)
+    }
+
+    private var failedItems: [UUID] {
+        processingViewModel.processedItems
+            .filter { $0.status == .failed }
             .map(\.id)
     }
 
@@ -168,13 +183,46 @@ struct ResultsView: View {
         replaceableItems.filter { selectedIDs.contains($0.id) }
     }
 
+    private var failedItemsCount: Int {
+        processingViewModel.processedItems.filter { $0.status == .failed }.count
+    }
+
+    private var replaceBlockedCount: Int {
+        selectedExportableItems.count - selectedReplaceableItems.count
+    }
+
+    @ViewBuilder
+    private var resultsSummaryCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Run Summary")
+                .font(.headline)
+            HStack(spacing: 10) {
+                Label("Ready: \(readyItems.count)", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(SlideCropTheme.readyBadge)
+                Label("Review: \(needsReviewItems.count)", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(SlideCropTheme.reviewBadge)
+                if failedItemsCount > 0 {
+                    Label("Failed: \(failedItemsCount)", systemImage: "xmark.octagon.fill")
+                        .foregroundStyle(SlideCropTheme.failedBadge)
+                }
+            }
+            .font(.subheadline.weight(.semibold))
+
+            Text(needsReviewItems.isEmpty && failedItemsCount == 0 ? "Looks good. You can save now." : "Review flagged items before final save for best results.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(14)
+        .slideCropCard(cornerRadius: 18)
+    }
+
     @ViewBuilder
     private var actionPanel: some View {
         VStack(spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(SlideCropTheme.tint)
-                Text("\(selectedExportableItems.count) selected")
+                Text("\(selectedExportableItems.count) export-ready selected")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -202,8 +250,14 @@ struct ResultsView: View {
                 .frame(maxWidth: .infinity)
             }
 
-            if selectedExportableItems.count > selectedReplaceableItems.count {
-                Text("Some selected images can be saved as new but cannot replace originals because they were imported without direct Photo Library linkage.")
+            if replaceBlockedCount > 0 {
+                Text("\(replaceBlockedCount) selected image(s) cannot replace originals. Reason: imported without direct Photo Library linkage (camera/file picker). Save as New still works.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            if !purchaseManager.isUnlocked {
+                Text("Free saves left: \(remainingFreeSaves). Upgrade only when needed.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -215,9 +269,21 @@ struct ResultsView: View {
     @ViewBuilder
     private func section(title: String, ids: [UUID]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 2){
+                Text(title)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.primary)
+                if title == "Needs Review" {
+                    Text("Perspective confidence is lower. Tap item to compare or adjust crop.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                if title == "Failed" {
+                    Text("Try Retry Best Quality. If still failing, use Adjust Crop for manual recovery.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             LazyVGrid(columns: columns, spacing: 14) {
                 ForEach(ids, id: \.self) { id in
@@ -230,6 +296,26 @@ struct ResultsView: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 openItem(item, id: id)
+                            }
+                            .overlay(alignment: .center) {
+                                if retryingIDs.contains(id) {
+                                    ProgressView()
+                                        .padding(8)
+                                        .background(.ultraThinMaterial, in: Capsule())
+                                }
+                            }
+                            .contextMenu {
+                                Button("Open Compare", systemImage: "rectangle.split.2x1") { selectedDestination = .compare(id) }
+                                if item.canManualAdjust {
+                                    Button("Adjust Crop", systemImage: "crop") { selectedDestination = .adjust(id) }
+                                }
+                                if item.status != .auto {
+                                    Button("Retry Best Quality", systemImage: "arrow.clockwise") {
+                                        Task { await retryItem(id: id) }
+                                    }
+                                    .disabled(retryingIDs.contains(id))
+                                }
+                                Button(selectedIDs.contains(id) ? "Deselect" : "Select", systemImage: selectedIDs.contains(id) ? "checkmark.circle" : "circle") { toggleSelection(for: id) }
                             }
 
                             Button {
@@ -329,6 +415,8 @@ struct ResultsView: View {
         case .replaceOriginals:
             savedCount = await resultsViewModel.replaceOriginals(with: selectedReplaceableItems)
         }
+        let actionName: String
+        switch action { case .saveAsNew: actionName = "saveAsNew"; case .replaceOriginals: actionName = "replace" }
         registerFreeSaveUsage(savedCount)
     }
 
@@ -357,6 +445,45 @@ struct ResultsView: View {
         pendingSaveAction = nil
         paywallRequestedCount = 0
         refreshRemainingFreeSaves()
+    }
+
+
+    private func retryItem(id: UUID) async {
+        guard let index = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) else { return }
+        var item = processingViewModel.processedItems[index]
+        guard !retryingIDs.contains(id) else { return }
+        retryingIDs.insert(id)
+        defer { retryingIDs.remove(id) }
+
+        let retrySettings = ProcessingSettings(enhanceReadability: true, quality: .best)
+        let updated: ProcessedItem
+
+        if let dataURL = item.sourceImageURL,
+           let data = try? Data(contentsOf: dataURL) {
+            updated = await retryService.processImageData(
+                data,
+                sourceIdentifier: item.assetIdentifier,
+                settings: retrySettings,
+                fallbackThumbnail: item.originalThumbnail
+            )
+        } else {
+            updated = await retryService.processAsset(
+                assetIdentifier: item.assetIdentifier,
+                settings: retrySettings,
+                fallbackThumbnail: item.originalThumbnail
+            )
+        }
+
+        var merged = updated
+        merged.id = item.id
+        processingViewModel.processedItems[index] = merged
+
+        if merged.processedImageURL != nil && merged.status != .failed {
+            selectedIDs.insert(merged.id)
+            resultsViewModel.toastMessage = "Retry succeeded for one item."
+        } else {
+            resultsViewModel.toastMessage = "Retry still failed. Try Adjust Crop for manual recovery."
+        }
     }
 
     private func item(for id: UUID) -> ProcessedItem? {

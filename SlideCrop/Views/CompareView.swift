@@ -102,11 +102,11 @@ struct CompareView: View {
 
             ZoomableImageView(image: image)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.white.opacity(0.44))
+                .background(SlideCropTheme.imagePaneBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                        .stroke(SlideCropTheme.imagePaneStroke, lineWidth: 1)
                 )
                 .shadow(color: SlideCropTheme.panelShadow, radius: 10, y: 5)
         }

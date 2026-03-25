@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum SlideCropTheme {
     static let tint = Color(red: 0.34, green: 0.41, blue: 0.68)
@@ -8,27 +9,35 @@ enum SlideCropTheme {
     static let violet = Color(red: 0.71, green: 0.66, blue: 0.90)
     static let indigo = Color(red: 0.55, green: 0.61, blue: 0.86)
 
-    static let pageBase = Color(red: 0.97, green: 0.97, blue: 0.985)
-    static let readyBadge = Color(red: 0.30, green: 0.74, blue: 0.53)
-    static let reviewBadge = Color(red: 0.87, green: 0.60, blue: 0.30)
-    static let failedBadge = Color(red: 0.84, green: 0.35, blue: 0.36)
+    static let pageBase = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.08, green: 0.09, blue: 0.12, alpha: 1) : UIColor(red: 0.97, green: 0.97, blue: 0.985, alpha: 1) })
+    static let readyBadge = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.42, green: 0.88, blue: 0.62, alpha: 1) : UIColor(red: 0.30, green: 0.74, blue: 0.53, alpha: 1) })
+    static let reviewBadge = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.72, blue: 0.40, alpha: 1) : UIColor(red: 0.87, green: 0.60, blue: 0.30, alpha: 1) })
+    static let failedBadge = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.48, blue: 0.48, alpha: 1) : UIColor(red: 0.84, green: 0.35, blue: 0.36, alpha: 1) })
     static let cropAccent = Color(red: 0.38, green: 0.94, blue: 0.76)
 
-    static let panelStroke = Color.white.opacity(0.64)
-    static let panelShadow = Color.black.opacity(0.08)
+    static let panelStroke = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.18) : UIColor.white.withAlphaComponent(0.64) })
+    static let panelShadow = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.black.withAlphaComponent(0.40) : UIColor.black.withAlphaComponent(0.08) })
 
     static var pageGradient: LinearGradient {
-        LinearGradient(
+        let isDark = UITraitCollection.current.userInterfaceStyle == .dark
+        return LinearGradient(
             colors: [
-                peach.opacity(0.24),
-                rose.opacity(0.20),
-                violet.opacity(0.19),
-                indigo.opacity(0.22)
+                peach.opacity(isDark ? 0.10 : 0.24),
+                rose.opacity(isDark ? 0.09 : 0.20),
+                violet.opacity(isDark ? 0.09 : 0.19),
+                indigo.opacity(isDark ? 0.12 : 0.22)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
     }
+
+
+
+    static let imagePaneBackground = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.08) : UIColor.white.withAlphaComponent(0.44) })
+    static let imagePaneStroke = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.20) : UIColor.white.withAlphaComponent(0.60) })
+    static let placeholderFill = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.12) : UIColor.white.withAlphaComponent(0.58) })
+    static let mutedCapsuleBackground = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.16) : UIColor.white.withAlphaComponent(0.50) })
 
     static var primaryButtonGradient: LinearGradient {
         LinearGradient(
