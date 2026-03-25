@@ -44,6 +44,7 @@ struct PaywallView: View {
                             featureRow("infinity.circle.fill", "Unlimited saves forever")
                             featureRow("photo.on.rectangle.angled", "Save as New Images")
                             featureRow("arrow.triangle.2.circlepath", "Replace Originals with reversible edits")
+                            featureRow("doc.richtext.fill", "Unlimited PDF exports")
                         }
                         .padding(18)
                         .slideCropCard(cornerRadius: 20)
@@ -143,11 +144,19 @@ struct PaywallView: View {
     }
 
     private var paywallMessage: String {
+        if requestedCount == 0 && remainingFreeSaves > 0 {
+            // Triggered from PDF export (paid-only feature)
+            if let product = purchaseManager.product {
+                return "PDF export is a premium feature. Unlock unlimited saves & exports for \(product.displayPrice)."
+            }
+            return "PDF export is a premium feature. Unlock to export."
+        }
+
         if remainingFreeSaves <= 0 {
             if let product = purchaseManager.product {
-                return "You've used 10 free saves. Unlock unlimited saves for \(product.displayPrice)."
+                return "You've used all free saves. Unlock unlimited saves & exports for \(product.displayPrice)."
             }
-            return "You've used 10 free saves. Unlock unlimited saves."
+            return "You've used all free saves. Unlock unlimited saves & exports."
         }
 
         return "You have \(remainingFreeSaves) free saves left. Unlock unlimited to save all \(requestedCount) selected images."

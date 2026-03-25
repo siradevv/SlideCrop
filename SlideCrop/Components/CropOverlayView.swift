@@ -4,21 +4,25 @@ import UIKit
 struct CropOverlayView: View {
     @Binding var quad: CropQuad
     let image: UIImage?
+    var snapEngine: SnapEngine?
     var onInteractionBegan: (() -> Void)?
     var onInteractionEnded: (() -> Void)?
 
     @State private var activeHandleIndex: Int?
     @State private var activeEdgeIndex: Int?
     @State private var dragStartQuad: CropQuad?
+    @State private var didFireSnapHaptic = false
 
     init(
         quad: Binding<CropQuad>,
         image: UIImage? = nil,
+        snapEngine: SnapEngine? = nil,
         onInteractionBegan: (() -> Void)? = nil,
         onInteractionEnded: (() -> Void)? = nil
     ) {
         _quad = quad
         self.image = image
+        self.snapEngine = snapEngine
         self.onInteractionBegan = onInteractionBegan
         self.onInteractionEnded = onInteractionEnded
     }
@@ -59,6 +63,23 @@ struct CropOverlayView: View {
                 }
                 .stroke(SlideCropTheme.cropAccent, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
 
+                if let snapEngine {
+                    ForEach(0..<snapEngine.targetQuads.count, id: \.self) { qi in
+                        let tp = snapEngine.targetQuads[qi].points.map { p in
+                            CGPoint(x: p.x * size.width, y: p.y * size.height)
+                        }
+                        Path { path in
+                            path.move(to: tp[0])
+                            for p in tp.dropFirst() { path.addLine(to: p) }
+                            path.closeSubpath()
+                        }
+                        .stroke(
+                            SlideCropTheme.cropAccent.opacity(0.25),
+                            style: StrokeStyle(lineWidth: 1, dash: [4, 4])
+                        )
+                    }
+                }
+
                 ForEach(0..<4, id: \.self) { index in
                     let next = (index + 1) % 4
                     let midpoint = CGPoint(
@@ -75,6 +96,8 @@ struct CropOverlayView: View {
                         .frame(width: 12, height: 12)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
+                        .accessibilityLabel(Self.edgeLabel(for: index))
+                        .accessibilityHint("Drag to adjust crop edge")
                         .position(midpoint)
                         .gesture(
                             DragGesture(minimumDistance: 0)
@@ -84,6 +107,7 @@ struct CropOverlayView: View {
                                         activeHandleIndex = nil
                                         dragStartQuad = quad
                                         onInteractionBegan?()
+                                        HapticService.lightImpact()
                                     }
 
                                     let baselineQuad = dragStartQuad ?? quad
@@ -113,11 +137,32 @@ struct CropOverlayView: View {
                                         at: next,
                                         to: CGPoint(x: p2n.x + normalizedOffset.x, y: p2n.y + normalizedOffset.y)
                                     )
-                                    quad = moved.clamped()
+
+                                    if let snapEngine {
+                                        let (s1, s2, didSnap) = snapEngine.snapEdge(
+                                            point1: moved.point(at: index),
+                                            point2: moved.point(at: next)
+                                        )
+                                        if didSnap {
+                                            moved.updatePoint(at: index, to: s1)
+                                            moved.updatePoint(at: next, to: s2)
+                                            if !didFireSnapHaptic {
+                                                HapticService.lightImpact()
+                                                didFireSnapHaptic = true
+                                            }
+                                        } else {
+                                            didFireSnapHaptic = false
+                                        }
+                                    }
+
+                                    let clamped = moved.clamped()
+                                    guard clamped.isConvex else { return }
+                                    quad = clamped
                                 }
                                 .onEnded { _ in
                                     activeEdgeIndex = nil
                                     dragStartQuad = nil
+                                    didFireSnapHaptic = false
                                     onInteractionEnded?()
                                 }
                         )
@@ -135,6 +180,8 @@ struct CropOverlayView: View {
                     }
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
+                    .accessibilityLabel(Self.cornerLabel(for: index))
+                    .accessibilityHint("Drag to adjust crop corner")
                     .position(points[index])
                         .gesture(
                             DragGesture(minimumDistance: 0)
@@ -144,6 +191,7 @@ struct CropOverlayView: View {
                                         activeEdgeIndex = nil
                                         dragStartQuad = quad
                                         onInteractionBegan?()
+                                        HapticService.lightImpact()
                                     }
 
                                     let baselineQuad = dragStartQuad ?? quad
@@ -155,14 +203,31 @@ struct CropOverlayView: View {
                                         y: min(1, max(0, startPoint.y + (value.translation.height / max(size.height, 1))))
                                     )
 
-                                    var next = quad
-                                    next.updatePoint(at: index, to: normalized)
-                                    quad = next.clamped()
+                                    var finalPoint = normalized
+                                    if let snapEngine {
+                                        let (snapped, didSnap) = snapEngine.snapCorner(normalized)
+                                        finalPoint = snapped
+                                        if didSnap {
+                                            if !didFireSnapHaptic {
+                                                HapticService.lightImpact()
+                                                didFireSnapHaptic = true
+                                            }
+                                        } else {
+                                            didFireSnapHaptic = false
+                                        }
+                                    }
+
+                                    var candidate = quad
+                                    candidate.updatePoint(at: index, to: finalPoint)
+                                    let clamped = candidate.clamped()
+                                    guard clamped.isConvex else { return }
+                                    quad = clamped
                                 }
                                 .onEnded { _ in
                                     activeHandleIndex = nil
                                     activeEdgeIndex = nil
                                     dragStartQuad = nil
+                                    didFireSnapHaptic = false
                                     onInteractionEnded?()
                                 }
                         )
@@ -198,6 +263,24 @@ struct CropOverlayView: View {
                         .animation(.easeOut(duration: 0.12), value: activeEdgeIndex)
                 }
             }
+        }
+    }
+
+    private static func cornerLabel(for index: Int) -> String {
+        switch index {
+        case 0: return "Top left crop handle"
+        case 1: return "Top right crop handle"
+        case 2: return "Bottom right crop handle"
+        default: return "Bottom left crop handle"
+        }
+    }
+
+    private static func edgeLabel(for index: Int) -> String {
+        switch index {
+        case 0: return "Top edge handle"
+        case 1: return "Right edge handle"
+        case 2: return "Bottom edge handle"
+        default: return "Left edge handle"
         }
     }
 

@@ -22,6 +22,9 @@ struct CropAdjustmentView: View {
     @GestureState private var pinchScale: CGFloat = 1
     @State private var quadHistory: [CropQuad] = []
     @State private var pendingHistorySnapshot: CropQuad?
+    @State private var activePreset: CropPreset = .free
+    @State private var isSnapEnabled = true
+    @State private var detectedQuads: [CropQuad] = []
 
     private let photoLibraryService = PhotoLibraryService()
     private let cropService = SlideCropService()
@@ -104,8 +107,14 @@ struct CropAdjustmentView: View {
                                     CropOverlayView(
                                         quad: $quad,
                                         image: image,
+                                        snapEngine: isSnapEnabled && !detectedQuads.isEmpty
+                                            ? SnapEngine(targetQuads: detectedQuads, threshold: 0.04)
+                                            : nil,
                                         onInteractionBegan: beginQuadInteraction,
-                                        onInteractionEnded: commitQuadInteraction
+                                        onInteractionEnded: {
+                                            commitQuadInteraction()
+                                            activePreset = .free
+                                        }
                                     )
                                     .frame(width: canvasSize.width, height: canvasSize.height)
                                 }
@@ -173,24 +182,73 @@ struct CropAdjustmentView: View {
                 }
 
                 ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        undoLastAdjustment()
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                            .font(.system(size: 18, weight: .semibold))
-                            .frame(width: 36, height: 36)
+                    HStack(spacing: 10) {
+                        Button {
+                            undoLastAdjustment()
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 34, height: 34)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white.opacity(0.95))
+                        .background(Color.white.opacity(0.10), in: Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                        .disabled(quadHistory.isEmpty)
+
+                        Button {
+                            isSnapEnabled.toggle()
+                            HapticService.lightImpact()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: isSnapEnabled ? "scope" : "scope")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text("Snap")
+                                    .font(.caption.weight(.semibold))
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(isSnapEnabled ? SlideCropTheme.cropAccent : .white.opacity(0.65))
+                        .background(
+                            isSnapEnabled
+                                ? SlideCropTheme.cropAccent.opacity(0.2)
+                                : Color.white.opacity(0.10),
+                            in: Capsule()
+                        )
+                        .overlay(Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1))
+
+                        Spacer()
+
+                        ForEach(CropPreset.allCases) { preset in
+                            Button {
+                                applyPreset(preset)
+                            } label: {
+                                Text(preset.label)
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(activePreset == preset ? .white : .white.opacity(0.65))
+                            .background(
+                                activePreset == preset
+                                    ? SlideCropTheme.tint.opacity(0.7)
+                                    : Color.white.opacity(0.10),
+                                in: Capsule()
+                            )
+                            .overlay(Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1))
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.white.opacity(0.95))
-                    .background(Color.white.opacity(0.10), in: Circle())
-                    .overlay(
-                        Circle().stroke(Color.white.opacity(0.18), lineWidth: 1)
-                    )
-                    .disabled(quadHistory.isEmpty)
                 }
             }
             .task {
-                displayImage = await loadEditorImage()
+                let image = await loadEditorImage()
+                displayImage = image
+                if let image {
+                    detectedQuads = cropService.detectSnapTargets(in: image)
+                }
             }
             .alert(
                 "Crop Error",
@@ -324,5 +382,48 @@ struct CropAdjustmentView: View {
         guard let previous = quadHistory.popLast() else { return }
         pendingHistorySnapshot = nil
         quad = previous
+        activePreset = .free
+    }
+
+    private func applyPreset(_ preset: CropPreset) {
+        guard preset != .free else {
+            activePreset = .free
+            return
+        }
+        guard let image = displayImage else { return }
+        let imageAspect = image.size.width / max(image.size.height, 1)
+
+        beginQuadInteraction()
+        quad = quad.snappedToAspectRatio(preset.ratio, imageAspect: imageAspect)
+        commitQuadInteraction()
+        activePreset = preset
+        HapticService.lightImpact()
+    }
+}
+
+private enum CropPreset: String, CaseIterable, Identifiable {
+    case free = "free"
+    case sixteenNine = "16:9"
+    case fourThree = "4:3"
+    case square = "1:1"
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .free: return "Free"
+        case .sixteenNine: return "16:9"
+        case .fourThree: return "4:3"
+        case .square: return "1:1"
+        }
+    }
+
+    var ratio: CGFloat {
+        switch self {
+        case .free: return 0
+        case .sixteenNine: return 16.0 / 9.0
+        case .fourThree: return 4.0 / 3.0
+        case .square: return 1.0
+        }
     }
 }

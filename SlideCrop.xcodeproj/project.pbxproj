@@ -3,75 +3,127 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04691F590CCFD96E582C9F8E /* FreeSaveCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5967E5692C2118E7F75AABE /* FreeSaveCounter.swift */; };
 		0BA03FEAE4A412322F86B374 /* ProcessedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC00C69EFA008B462372A49 /* ProcessedItem.swift */; };
+		0D25576176785A6FA8ADEACA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F88B34F3095C0900DE1F6BF7 /* Assets.xcassets */; };
 		1438AE31104AD72AC27E312F /* ProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870E1134EBAB352472E6D72C /* ProcessingView.swift */; };
+		24439FF238A8A8533C7DC154 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */; };
 		26E3E289D57F8F4D9DF66B24 /* CropOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */; };
+		2835E911FF2980CC7D13007A /* CropQuad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7219AA8109A749C19EF5E /* CropQuad.swift */; };
+		32BBBFDB0483A57D9DA3DD24 /* SlideCropShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D98CE6B65ADABC8EA668C410 /* SlideCropShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3A05534881D1C4EC22EB99B7 /* SlideCropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D4CFD669EB22F24902F9A8 /* SlideCropApp.swift */; };
+		3E413607565BEB73F4504223 /* SlideCropService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24B0668612CA7E446EE759D /* SlideCropService.swift */; };
+		40437A53DAD026976A0A5523 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3102D39662265CF6D7B38985 /* LaunchScreen.storyboard */; };
+		4417C569B0E5E0B6875F6381 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258AEE1CDCF211BC2DA1F543 /* PaywallView.swift */; };
 		44CB1F68C9B4DD179EC23BE0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */; };
+		4A73374601BD5DE605F0D839 /* ProcessingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673A41447F8B34BE9198B72C /* ProcessingSettings.swift */; };
 		4C0DA11F095B26524AE50EB1 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */; };
+		4EF2ED04F350D470CD0DACD0 /* ProcessedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC00C69EFA008B462372A49 /* ProcessedItem.swift */; };
 		55D005FC4534DBFAEFF4487D /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */; };
 		578F2054A9297A9E981FBE1E /* HeroCropIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062648169CC9BFB6D008A275 /* HeroCropIconView.swift */; };
 		611FED8B76776C7E8D1D305F /* PressScaleButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */; };
 		680DC6A64DE63CEA75DF58BA /* ResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */; };
+		68FCD6F041AB4A7CCA1D89C8 /* ActivityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB91189CEACB3B410BD442A /* ActivityViewController.swift */; };
 		69E8B2FE0E91B9622CA44492 /* ProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */; };
-		6D1A0F9E7C324B8A8F124901 /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D1A0F9E7C324B8A8F124902 /* PurchaseManager.swift */; };
+		781D5B6588DBE82124827BE9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1CD28AAC309B3CCF819ADECC /* PrivacyInfo.xcprivacy */; };
 		79A18CE60F04840D3AF10AF5 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */; };
+		7DF2B89AE239AE67C24A02D3 /* SlideCropProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 809697BD6768C039835BCDFF /* SlideCropProducts.storekit */; };
+		9E2D018205924E09C27BEACB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10473BED26F2E1C7D20DDC34 /* ShareViewController.swift */; };
+		AA0AD52133B35707C6E6AF08 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2235093AD953B95FD6A961 /* PDFPreviewView.swift */; };
+		AEFB1860B586083E01B6A72D /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC4AA310056A022320413E6 /* ShareView.swift */; };
 		AF415689B2F6E4141750A29C /* SlideCropError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5512314C55B71F36594470AD /* SlideCropError.swift */; };
+		B833564B3BCE9B2857DBAD33 /* ShareProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446C07CEEBCF5ADD5AD7F05E /* ShareProcessingViewModel.swift */; };
+		B89469B0D2407365654FDE6A /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44EED50D5AFA2D2411468A4E /* PurchaseManager.swift */; };
 		BDA637CE0526E7F524B20711 /* ZoomableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6659011523E4294CAF4F376 /* ZoomableImageView.swift */; };
 		BDE067D820D13857D3EBAF5F /* ResultThumbnailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94F8BBB8EC122AFE9C9E2E34 /* ResultThumbnailCell.swift */; };
-		BFB3170DAA124BEE896A61A1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB3170DAA124BEE896A61A2 /* PaywallView.swift */; };
 		C042C4F74F0894E79F5E9977 /* CropQuad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7219AA8109A749C19EF5E /* CropQuad.swift */; };
 		C4DED342F936CE8459E9EC42 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B868432921A473756E539937 /* CompareView.swift */; };
 		C57F2EDBBD683EDF8DD192AC /* ProcessingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673A41447F8B34BE9198B72C /* ProcessingSettings.swift */; };
+		C688D44B0E7472B38A1F4D98 /* PressScaleButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */; };
+		C7F0F40A90F6F3A99316EF9E /* SnapEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1525425B20B8E1A479C339D /* SnapEngine.swift */; };
 		C82D8F93E1FC8FB7AF0221CC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC4B48E8ED9FA97907692D9C /* SettingsView.swift */; };
+		CA9EE04FE523FA75DD66918F /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA26CD1355E6B5E6942D00BD /* HapticService.swift */; };
+		CC045B34433BFB271F444B79 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA26CD1355E6B5E6942D00BD /* HapticService.swift */; };
 		D0D7DE9B3CE7CEBFEAFB0FB6 /* SlideCropService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24B0668612CA7E446EE759D /* SlideCropService.swift */; };
 		D7623FDE7ECD843100B6037C /* CropAdjustmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */; };
-		E7D9A0CB715A4E0BA1B57411 /* FreeSaveCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D9A0CB715A4E0BA1B57412 /* FreeSaveCounter.swift */; };
-		F001A0A0A0A0A0A0A0A0A001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */; };
-		F001A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */; };
-		F001A0A0A0A0A0A0A0A0A003 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */; };
+		E0F42EB0B60F6E9FEAB2C346 /* SlideCropError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5512314C55B71F36594470AD /* SlideCropError.swift */; };
+		FBE0C8CD13938F94C39079A1 /* PDFExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE49A2B849B444C6B160E971 /* PDFExportService.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		56224465B533B0897BCCF1C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2C2B9B992ECEA2F291A92DAB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6684707BC8E92702B48AAC8A;
+			remoteInfo = SlideCropShare;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FA798B469DCEDF8419662F73 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				32BBBFDB0483A57D9DA3DD24 /* SlideCropShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		062648169CC9BFB6D008A275 /* HeroCropIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCropIconView.swift; sourceTree = "<group>"; };
-		236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlideCrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10473BED26F2E1C7D20DDC34 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		1CD28AAC309B3CCF819ADECC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SlideCrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		258AEE1CDCF211BC2DA1F543 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		2AB91189CEACB3B410BD442A /* ActivityViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewController.swift; sourceTree = "<group>"; };
+		2B2235093AD953B95FD6A961 /* PDFPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPreviewView.swift; sourceTree = "<group>"; };
+		3102D39662265CF6D7B38985 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3BE7219AA8109A749C19EF5E /* CropQuad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropQuad.swift; sourceTree = "<group>"; };
 		3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		446C07CEEBCF5ADD5AD7F05E /* ShareProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareProcessingViewModel.swift; sourceTree = "<group>"; };
+		44EED50D5AFA2D2411468A4E /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
 		477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropOverlayView.swift; sourceTree = "<group>"; };
 		4BC00C69EFA008B462372A49 /* ProcessedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessedItem.swift; sourceTree = "<group>"; };
 		5512314C55B71F36594470AD /* SlideCropError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropError.swift; sourceTree = "<group>"; };
 		5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropAdjustmentView.swift; sourceTree = "<group>"; };
 		673A41447F8B34BE9198B72C /* ProcessingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingSettings.swift; sourceTree = "<group>"; };
-		6D1A0F9E7C324B8A8F124902 /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
 		6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingViewModel.swift; sourceTree = "<group>"; };
 		70D4CFD669EB22F24902F9A8 /* SlideCropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropApp.swift; sourceTree = "<group>"; };
 		77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsViewModel.swift; sourceTree = "<group>"; };
+		809697BD6768C039835BCDFF /* SlideCropProducts.storekit */ = {isa = PBXFileReference; path = SlideCropProducts.storekit; sourceTree = "<group>"; };
 		80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		870E1134EBAB352472E6D72C /* ProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingView.swift; sourceTree = "<group>"; };
 		8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressScaleButtonStyle.swift; sourceTree = "<group>"; };
 		94F8BBB8EC122AFE9C9E2E34 /* ResultThumbnailCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultThumbnailCell.swift; sourceTree = "<group>"; };
+		AE49A2B849B444C6B160E971 /* PDFExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExportService.swift; sourceTree = "<group>"; };
 		B868432921A473756E539937 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
-		BFB3170DAA124BEE896A61A2 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		C5967E5692C2118E7F75AABE /* FreeSaveCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeSaveCounter.swift; sourceTree = "<group>"; };
 		C6659011523E4294CAF4F376 /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
+		D1525425B20B8E1A479C339D /* SnapEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapEngine.swift; sourceTree = "<group>"; };
 		D24B0668612CA7E446EE759D /* SlideCropService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideCropService.swift; sourceTree = "<group>"; };
-		E7D9A0CB715A4E0BA1B57412 /* FreeSaveCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeSaveCounter.swift; sourceTree = "<group>"; };
+		D98CE6B65ADABC8EA668C410 /* SlideCropShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SlideCropShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA26CD1355E6B5E6942D00BD /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
 		EC4B48E8ED9FA97907692D9C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		F002A0A0A0A0A0A0A0A0A003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F88B34F3095C0900DE1F6BF7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FFC4AA310056A022320413E6 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		0A933AA41F2D1EAC5702EAB6 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				2AB91189CEACB3B410BD442A /* ActivityViewController.swift */,
 				477ECE8A9DE7C3302E2DA7EA /* CropOverlayView.swift */,
 				062648169CC9BFB6D008A275 /* HeroCropIconView.swift */,
 				8B2C6A768F1DE61A16A4D7D9 /* PressScaleButtonStyle.swift */,
@@ -85,9 +137,9 @@
 		3815C65212D6202D9DA38FC7 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				E7D9A0CB715A4E0BA1B57412 /* FreeSaveCounter.swift */,
+				C5967E5692C2118E7F75AABE /* FreeSaveCounter.swift */,
 				6E2CB0E6D447C906687AA620 /* ProcessingViewModel.swift */,
-				6D1A0F9E7C324B8A8F124902 /* PurchaseManager.swift */,
+				44EED50D5AFA2D2411468A4E /* PurchaseManager.swift */,
 				77855E7950FDDF012AD7C0DC /* ResultsViewModel.swift */,
 				80B5E0CB4B09ECA460D689E1 /* SettingsViewModel.swift */,
 			);
@@ -104,13 +156,24 @@
 			path = SlideCrop/App;
 			sourceTree = "<group>";
 		};
+		63B0B20A06C4081F1031C85F /* SlideCropShare */ = {
+			isa = PBXGroup;
+			children = (
+				446C07CEEBCF5ADD5AD7F05E /* ShareProcessingViewModel.swift */,
+				FFC4AA310056A022320413E6 /* ShareView.swift */,
+				10473BED26F2E1C7D20DDC34 /* ShareViewController.swift */,
+			);
+			path = SlideCropShare;
+			sourceTree = "<group>";
+		};
 		641014F0FBCBFFA17076364F /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				B868432921A473756E539937 /* CompareView.swift */,
 				5D982A335BD520AC9DEEE1D9 /* CropAdjustmentView.swift */,
 				5CF7D85F3DEAA7D23E7915BA /* HomeView.swift */,
-				BFB3170DAA124BEE896A61A2 /* PaywallView.swift */,
+				258AEE1CDCF211BC2DA1F543 /* PaywallView.swift */,
+				2B2235093AD953B95FD6A961 /* PDFPreviewView.swift */,
 				870E1134EBAB352472E6D72C /* ProcessingView.swift */,
 				C3D502E4FE5B854F99F2BC44 /* ResultsView.swift */,
 				EC4B48E8ED9FA97907692D9C /* SettingsView.swift */,
@@ -123,15 +186,31 @@
 			isa = PBXGroup;
 			children = (
 				236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */,
+				D98CE6B65ADABC8EA668C410 /* SlideCropShare.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		BCCCBAAC57F8BFFF65E7AD62 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F88B34F3095C0900DE1F6BF7 /* Assets.xcassets */,
+				3102D39662265CF6D7B38985 /* LaunchScreen.storyboard */,
+				1CD28AAC309B3CCF819ADECC /* PrivacyInfo.xcprivacy */,
+				809697BD6768C039835BCDFF /* SlideCropProducts.storekit */,
+			);
+			name = Resources;
+			path = SlideCrop/Resources;
 			sourceTree = "<group>";
 		};
 		C1F702CD96C2159E9056ADA8 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				EA26CD1355E6B5E6942D00BD /* HapticService.swift */,
+				AE49A2B849B444C6B160E971 /* PDFExportService.swift */,
 				3E0717C526BB3A49A49FD6B0 /* PhotoLibraryService.swift */,
 				D24B0668612CA7E446EE759D /* SlideCropService.swift */,
+				D1525425B20B8E1A479C339D /* SnapEngine.swift */,
 			);
 			name = Services;
 			path = SlideCrop/Services;
@@ -155,24 +234,13 @@
 				605DF5B4716C031491C2E153 /* App */,
 				0A933AA41F2D1EAC5702EAB6 /* Components */,
 				D261C6CA68078543BA4A9651 /* Models */,
-				F003A0A0A0A0A0A0A0A0A001 /* Resources */,
+				BCCCBAAC57F8BFFF65E7AD62 /* Resources */,
 				C1F702CD96C2159E9056ADA8 /* Services */,
+				63B0B20A06C4081F1031C85F /* SlideCropShare */,
 				3815C65212D6202D9DA38FC7 /* ViewModels */,
 				641014F0FBCBFFA17076364F /* Views */,
 				96EA493D9F38612452CCFE18 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		F003A0A0A0A0A0A0A0A0A001 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				F002A0A0A0A0A0A0A0A0A001 /* Assets.xcassets */,
-				F002A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard */,
-				F002A0A0A0A0A0A0A0A0A003 /* Info.plist */,
-				F002A0A0A0A0A0A0A0A0A004 /* PrivacyInfo.xcprivacy */,
-			);
-			name = Resources;
-			path = SlideCrop/Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -182,12 +250,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58173A51C522374EA40DF4B8 /* Build configuration list for PBXNativeTarget "SlideCrop" */;
 			buildPhases = (
-				F004A0A0A0A0A0A0A0A0A001 /* Resources */,
 				3F010624A03FE26C2065ECEE /* Sources */,
+				379D0B12313EAEE0B5CA31EA /* Resources */,
+				FA798B469DCEDF8419662F73 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F2AD86638EDB27100EE8EC92 /* PBXTargetDependency */,
 			);
 			name = SlideCrop;
 			packageProductDependencies = (
@@ -195,6 +265,23 @@
 			productName = SlideCrop;
 			productReference = 236FD4D0B6DD5B0A3FF008F4 /* SlideCrop.app */;
 			productType = "com.apple.product-type.application";
+		};
+		6684707BC8E92702B48AAC8A /* SlideCropShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B783DD4EFA9121EDB701584C /* Build configuration list for PBXNativeTarget "SlideCropShare" */;
+			buildPhases = (
+				5A00D394AABFC26BC26C068F /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SlideCropShare;
+			packageProductDependencies = (
+			);
+			productName = SlideCropShare;
+			productReference = D98CE6B65ADABC8EA668C410 /* SlideCropShare.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -206,6 +293,9 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					037E53AD075AA13E8715D1B7 = {
+						ProvisioningStyle = Automatic;
+					};
+					6684707BC8E92702B48AAC8A = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -220,22 +310,25 @@
 			);
 			mainGroup = DAECEBB80547A51C173BF0E1;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				037E53AD075AA13E8715D1B7 /* SlideCrop */,
+				6684707BC8E92702B48AAC8A /* SlideCropShare */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F004A0A0A0A0A0A0A0A0A001 /* Resources */ = {
+		379D0B12313EAEE0B5CA31EA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F001A0A0A0A0A0A0A0A0A001 /* Assets.xcassets in Resources */,
-				F001A0A0A0A0A0A0A0A0A002 /* LaunchScreen.storyboard in Resources */,
-				F001A0A0A0A0A0A0A0A0A003 /* PrivacyInfo.xcprivacy in Resources */,
+				0D25576176785A6FA8ADEACA /* Assets.xcassets in Resources */,
+				40437A53DAD026976A0A5523 /* LaunchScreen.storyboard in Resources */,
+				781D5B6588DBE82124827BE9 /* PrivacyInfo.xcprivacy in Resources */,
+				7DF2B89AE239AE67C24A02D3 /* SlideCropProducts.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,20 +339,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68FCD6F041AB4A7CCA1D89C8 /* ActivityViewController.swift in Sources */,
 				C4DED342F936CE8459E9EC42 /* CompareView.swift in Sources */,
 				D7623FDE7ECD843100B6037C /* CropAdjustmentView.swift in Sources */,
 				26E3E289D57F8F4D9DF66B24 /* CropOverlayView.swift in Sources */,
 				C042C4F74F0894E79F5E9977 /* CropQuad.swift in Sources */,
+				04691F590CCFD96E582C9F8E /* FreeSaveCounter.swift in Sources */,
+				CC045B34433BFB271F444B79 /* HapticService.swift in Sources */,
 				578F2054A9297A9E981FBE1E /* HeroCropIconView.swift in Sources */,
 				44CB1F68C9B4DD179EC23BE0 /* HomeView.swift in Sources */,
-				BFB3170DAA124BEE896A61A1 /* PaywallView.swift in Sources */,
+				FBE0C8CD13938F94C39079A1 /* PDFExportService.swift in Sources */,
+				AA0AD52133B35707C6E6AF08 /* PDFPreviewView.swift in Sources */,
+				4417C569B0E5E0B6875F6381 /* PaywallView.swift in Sources */,
 				79A18CE60F04840D3AF10AF5 /* PhotoLibraryService.swift in Sources */,
 				611FED8B76776C7E8D1D305F /* PressScaleButtonStyle.swift in Sources */,
 				0BA03FEAE4A412322F86B374 /* ProcessedItem.swift in Sources */,
 				C57F2EDBBD683EDF8DD192AC /* ProcessingSettings.swift in Sources */,
 				1438AE31104AD72AC27E312F /* ProcessingView.swift in Sources */,
 				69E8B2FE0E91B9622CA44492 /* ProcessingViewModel.swift in Sources */,
-				6D1A0F9E7C324B8A8F124901 /* PurchaseManager.swift in Sources */,
+				B89469B0D2407365654FDE6A /* PurchaseManager.swift in Sources */,
 				BDE067D820D13857D3EBAF5F /* ResultThumbnailCell.swift in Sources */,
 				4C0DA11F095B26524AE50EB1 /* ResultsView.swift in Sources */,
 				680DC6A64DE63CEA75DF58BA /* ResultsViewModel.swift in Sources */,
@@ -268,14 +366,86 @@
 				3A05534881D1C4EC22EB99B7 /* SlideCropApp.swift in Sources */,
 				AF415689B2F6E4141750A29C /* SlideCropError.swift in Sources */,
 				D0D7DE9B3CE7CEBFEAFB0FB6 /* SlideCropService.swift in Sources */,
-				E7D9A0CB715A4E0BA1B57411 /* FreeSaveCounter.swift in Sources */,
+				C7F0F40A90F6F3A99316EF9E /* SnapEngine.swift in Sources */,
 				BDA637CE0526E7F524B20711 /* ZoomableImageView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A00D394AABFC26BC26C068F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2835E911FF2980CC7D13007A /* CropQuad.swift in Sources */,
+				CA9EE04FE523FA75DD66918F /* HapticService.swift in Sources */,
+				24439FF238A8A8533C7DC154 /* PhotoLibraryService.swift in Sources */,
+				C688D44B0E7472B38A1F4D98 /* PressScaleButtonStyle.swift in Sources */,
+				4EF2ED04F350D470CD0DACD0 /* ProcessedItem.swift in Sources */,
+				4A73374601BD5DE605F0D839 /* ProcessingSettings.swift in Sources */,
+				B833564B3BCE9B2857DBAD33 /* ShareProcessingViewModel.swift in Sources */,
+				AEFB1860B586083E01B6A72D /* ShareView.swift in Sources */,
+				9E2D018205924E09C27BEACB /* ShareViewController.swift in Sources */,
+				E0F42EB0B60F6E9FEAB2C346 /* SlideCropError.swift in Sources */,
+				3E413607565BEB73F4504223 /* SlideCropService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		F2AD86638EDB27100EE8EC92 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6684707BC8E92702B48AAC8A /* SlideCropShare */;
+			targetProxy = 56224465B533B0897BCCF1C8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		356B3AA81B651CA808B0A09A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				INFOPLIST_FILE = SlideCropShare/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.SlideCrop.ShareExtension;
+				PRODUCT_NAME = SlideCropShare;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPEXTENSION;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		37896ACBED1F0ADC7E68FC69 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				INFOPLIST_FILE = SlideCropShare/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.SlideCrop.ShareExtension;
+				PRODUCT_NAME = SlideCropShare;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPEXTENSION;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		63ABBB545AFEA337C94195BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -336,24 +506,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T83P6KMGQJ;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = SlideCrop/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.newsira.slidecrop;
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.SlideCrop;
 				PRODUCT_NAME = SlideCrop;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -424,24 +590,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T83P6KMGQJ;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = SlideCrop/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.newsira.slidecrop;
+				MARKETING_VERSION = 3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.SlideCrop;
 				PRODUCT_NAME = SlideCrop;
 				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -462,6 +624,15 @@
 			buildConfigurations = (
 				C354BA74DB7F50A996FF3201 /* Debug */,
 				63ABBB545AFEA337C94195BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B783DD4EFA9121EDB701584C /* Build configuration list for PBXNativeTarget "SlideCropShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37896ACBED1F0ADC7E68FC69 /* Debug */,
+				356B3AA81B651CA808B0A09A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

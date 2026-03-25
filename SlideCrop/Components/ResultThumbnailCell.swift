@@ -49,6 +49,8 @@ struct ResultThumbnailCell: View {
                     .background(.ultraThinMaterial, in: Capsule())
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Photo, \(item.status.rawValue), confidence \(Int(item.confidenceScore * 100)) percent")
         .opacity(isVisible ? 1 : 0)
         .scaleEffect(isVisible ? 1 : 0.96)
         .animation(.easeOut(duration: 0.28), value: isVisible)

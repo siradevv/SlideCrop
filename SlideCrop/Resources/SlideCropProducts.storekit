@@ -1,0 +1,35 @@
+{
+  "identifier" : "com.newsira.slidecrop.products",
+  "nonRenewableSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "1",
+      "localizations" : [
+        {
+          "description" : "Unlock unlimited saves and PDF exports",
+          "displayName" : "Unlimited SlideCrop",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.newsira.slidecrop.unlimited",
+      "referenceName" : "Unlimited SlideCrop",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1",
+    "_developerTeamID" : "",
+    "_lastSynchronizedDate" : "2026-03-25T00:00:00Z"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

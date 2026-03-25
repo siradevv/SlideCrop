@@ -3,6 +3,26 @@ import Photos
 import UIKit
 
 final class PhotoLibraryService {
+    private let thumbnailCache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        #if APPEXTENSION
+        cache.countLimit = 10
+        #else
+        cache.countLimit = 50
+        #endif
+        return cache
+    }()
+
+    private let displayImageCache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        #if APPEXTENSION
+        cache.countLimit = 3
+        #else
+        cache.countLimit = 10
+        #endif
+        return cache
+    }()
+
     func requestReadWriteAccess() async -> PHAuthorizationStatus {
         await withCheckedContinuation { continuation in
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
@@ -20,9 +40,30 @@ final class PhotoLibraryService {
     }
 
     func requestThumbnail(for localIdentifier: String, targetSize: CGSize) async -> UIImage? {
+        let cacheKey = "\(localIdentifier)_\(Int(targetSize.width))x\(Int(targetSize.height))" as NSString
+        if let cached = thumbnailCache.object(forKey: cacheKey) {
+            return cached
+        }
+
         guard let asset = fetchAsset(with: localIdentifier) else { return nil }
 
-        return await withCheckedContinuation { continuation in
+        return await withTaskGroup(of: UIImage?.self) { [thumbnailCache] group in
+            group.addTask {
+                await self.fetchThumbnail(for: asset, targetSize: targetSize, cacheKey: cacheKey, cache: thumbnailCache)
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(15))
+                return nil
+            }
+
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private func fetchThumbnail(for asset: PHAsset, targetSize: CGSize, cacheKey: NSString, cache: NSCache<NSString, UIImage>) async -> UIImage? {
+        await withCheckedContinuation { continuation in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .fast
@@ -47,12 +88,20 @@ final class PhotoLibraryService {
                     return
                 }
                 didResume = true
+                if let image {
+                    cache.setObject(image, forKey: cacheKey)
+                }
                 continuation.resume(returning: image)
             }
         }
     }
 
     func requestDisplayImage(for localIdentifier: String, maxPixelSize: CGFloat) async -> UIImage? {
+        let cacheKey = "\(localIdentifier)_\(Int(maxPixelSize))" as NSString
+        if let cached = displayImageCache.object(forKey: cacheKey) {
+            return cached
+        }
+
         guard let asset = fetchAsset(with: localIdentifier) else { return nil }
 
         let longEdge = CGFloat(max(asset.pixelWidth, asset.pixelHeight))
@@ -62,7 +111,23 @@ final class PhotoLibraryService {
             height: CGFloat(asset.pixelHeight) * min(scale, 1)
         )
 
-        return await withCheckedContinuation { continuation in
+        return await withTaskGroup(of: UIImage?.self) { [displayImageCache] group in
+            group.addTask {
+                await self.fetchDisplayImage(for: asset, targetSize: size, cacheKey: cacheKey, cache: displayImageCache)
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(30))
+                return nil
+            }
+
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private func fetchDisplayImage(for asset: PHAsset, targetSize: CGSize, cacheKey: NSString, cache: NSCache<NSString, UIImage>) async -> UIImage? {
+        await withCheckedContinuation { continuation in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .exact
@@ -71,7 +136,7 @@ final class PhotoLibraryService {
 
             PHImageManager.default().requestImage(
                 for: asset,
-                targetSize: size,
+                targetSize: targetSize,
                 contentMode: .aspectFit,
                 options: options
             ) { image, info in
@@ -87,6 +152,9 @@ final class PhotoLibraryService {
                     return
                 }
                 didResume = true
+                if let image {
+                    cache.setObject(image, forKey: cacheKey)
+                }
                 continuation.resume(returning: image)
             }
         }
@@ -109,7 +177,7 @@ final class PhotoLibraryService {
         }
     }
 
-    func replaceOriginalImages(items: [ProcessedItem]) async throws -> Int {
+    func replaceOriginalImages(items: [ProcessedItem], onItemCompleted: (@MainActor (Int) -> Void)? = nil) async throws -> Int {
         let status = await requestReadWriteAccess()
         guard status == .authorized || status == .limited else {
             throw SlideCropError.permissionDenied
@@ -142,15 +210,18 @@ final class PhotoLibraryService {
                 changeRequest.contentEditingOutput = output
             }
             replacedCount += 1
+            await onItemCompleted?(replacedCount)
         }
 
         return replacedCount
     }
 
+    #if !APPEXTENSION
     @MainActor
     func presentLimitedLibraryPicker(from presenter: UIViewController) {
         PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: presenter)
     }
+    #endif
 
     private func fetchAsset(with localIdentifier: String) -> PHAsset? {
         let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)

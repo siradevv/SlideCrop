@@ -3,6 +3,8 @@ import Foundation
 @MainActor
 final class ResultsViewModel: ObservableObject {
     @Published private(set) var isSaving = false
+    @Published private(set) var saveProgressCurrent = 0
+    @Published private(set) var saveProgressTotal = 0
     @Published var toastMessage: String?
 
     private let photoLibraryService: PhotoLibraryService
@@ -18,10 +20,17 @@ final class ResultsViewModel: ObservableObject {
         guard !exportableItems.isEmpty else { return 0 }
 
         isSaving = true
-        defer { isSaving = false }
+        saveProgressCurrent = 0
+        saveProgressTotal = exportableItems.count
+        defer {
+            isSaving = false
+            saveProgressCurrent = 0
+            saveProgressTotal = 0
+        }
 
         do {
             try await photoLibraryService.saveNewImages(items: exportableItems)
+            saveProgressCurrent = exportableItems.count
             toastMessage = "Saved \(exportableItems.count) image(s) as new photos."
             return exportableItems.count
         } catch {
@@ -41,11 +50,20 @@ final class ResultsViewModel: ObservableObject {
         }
 
         isSaving = true
-        defer { isSaving = false }
+        saveProgressCurrent = 0
+        saveProgressTotal = replaceLinkedItems.count
+        defer {
+            isSaving = false
+            saveProgressCurrent = 0
+            saveProgressTotal = 0
+        }
 
         do {
             let replacedCount = try await photoLibraryService.replaceOriginalImages(
-                items: replaceLinkedItems
+                items: replaceLinkedItems,
+                onItemCompleted: { [weak self] completed in
+                    self?.saveProgressCurrent = completed
+                }
             )
             if replacedCount == 0 {
                 toastMessage = "No replaceable originals found. Re-select photos from the library and ensure full Photos access."

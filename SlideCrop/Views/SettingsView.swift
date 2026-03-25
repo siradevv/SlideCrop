@@ -27,16 +27,6 @@ struct SettingsView: View {
                     .foregroundStyle(.primary)
                 }
 
-                Section("Workflow Tips") {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("• Use Save as New for the safest export flow.")
-                        Text("• Replace Originals works only for directly linked Photos selections.")
-                        Text("• For low-confidence items, use Compare or Adjust Crop before final save.")
-                    }
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-
                 Section("About") {
                     LabeledContent("Version", value: appVersionText)
                     LabeledContent("Support", value: supportEmail)

@@ -86,7 +86,7 @@ struct CompareView: View {
                     var merged = updated
                     merged.id = item.id
                     item = merged
-                    afterImage = merged.processedThumbnail ?? UIImage(contentsOfFile: merged.processedImageURL?.path ?? "")
+                    afterImage = merged.processedThumbnail ?? merged.processedImageURL.flatMap { UIImage(contentsOfFile: $0.path) }
                     onManualAdjustmentApplied?(merged)
                 }
             }
@@ -100,15 +100,29 @@ struct CompareView: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            ZoomableImageView(image: image)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(SlideCropTheme.imagePaneBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(SlideCropTheme.imagePaneStroke, lineWidth: 1)
-                )
-                .shadow(color: SlideCropTheme.panelShadow, radius: 10, y: 5)
+            Group {
+                if let image {
+                    ZoomableImageView(image: image)
+                } else {
+                    VStack(spacing: 8) {
+                        Image(systemName: "photo.badge.exclamationmark")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                        Text("Image unavailable")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(SlideCropTheme.imagePaneBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(SlideCropTheme.imagePaneStroke, lineWidth: 1)
+            )
+            .shadow(color: SlideCropTheme.panelShadow, radius: 10, y: 5)
         }
     }
 

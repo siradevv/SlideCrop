@@ -12,6 +12,8 @@ final class PurchaseManager: ObservableObject {
     private let defaults: UserDefaults
     private let cachedUnlockKey = "isUnlimitedUnlockedCached"
 
+    private var updatesTask: Task<Void, Never>?
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.isUnlocked = defaults.bool(forKey: cachedUnlockKey)
@@ -21,6 +23,18 @@ final class PurchaseManager: ObservableObject {
             await refreshEntitlements()
             await loadProduct()
         }
+
+        updatesTask = Task { [weak self] in
+            for await result in Transaction.updates {
+                guard case let .verified(transaction) = result else { continue }
+                await transaction.finish()
+                await self?.refreshEntitlements()
+            }
+        }
+    }
+
+    deinit {
+        updatesTask?.cancel()
     }
 
     func loadProduct() async {

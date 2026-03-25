@@ -35,6 +35,14 @@ struct ResultsView: View {
     @State private var previousStatusByID: [UUID: ProcessedStatus] = [:]
     @State private var remainingFreeSaves = 0
     @State private var retryingIDs: Set<UUID> = []
+    @State private var isReorderMode = false
+    @State private var pdfURL: URL?
+    @State private var showingPDFPreview = false
+    @State private var isExportingPDF = false
+    @State private var showingLayoutPicker = false
+    @State private var pdfExportNeedsConsume = false
+    @State private var pendingPDFLayout: PDFLayout?
+    @State private var pendingPDFOrientation: PDFOrientation?
 
     private let retryService = SlideCropService()
 
@@ -43,37 +51,66 @@ struct ResultsView: View {
     private let columns = [GridItem(.adaptive(minimum: 150), spacing: 14)]
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
-                resultsSummaryCard
+        Group {
+            if isReorderMode {
+                reorderListView
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        resultsSummaryCard
 
-                if !readyItems.isEmpty {
-                    section(title: "Ready", ids: readyItems)
+                        if !readyItems.isEmpty {
+                            section(title: "Ready", ids: readyItems)
+                        }
+
+                        if !needsReviewItems.isEmpty {
+                            section(title: "Needs Review", ids: needsReviewItems)
+                        }
+
+                        if !failedItems.isEmpty {
+                            section(title: "Failed", ids: failedItems)
+                        }
+
+                        actionPanel
+                            .padding(.top, 8)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 24)
                 }
-
-                if !needsReviewItems.isEmpty {
-                    section(title: "Needs Review", ids: needsReviewItems)
-                }
-
-                if !failedItems.isEmpty {
-                    section(title: "Failed", ids: failedItems)
-                }
-
-                actionPanel
-                    .padding(.top, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
         }
         .background(SlideCropPageBackground())
         .navigationTitle("Results")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isReorderMode.toggle()
+                    }
+                } label: {
+                    Image(systemName: isReorderMode ? "square.grid.2x2" : "arrow.up.arrow.down")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(isReorderMode ? SlideCropTheme.tint : .white)
+                }
+                .accessibilityLabel(isReorderMode ? "Switch to grid view" : "Reorder items")
+            }
+        }
         .overlay {
             if resultsViewModel.isSaving {
                 ZStack {
                     Color.black.opacity(0.15).ignoresSafeArea()
-                    ProgressView("Saving")
+                    ProgressView(resultsViewModel.saveProgressTotal > 0
+                                 ? "Saving \(resultsViewModel.saveProgressCurrent) of \(resultsViewModel.saveProgressTotal)"
+                                 : "Saving")
+                        .padding(18)
+                        .slideCropCard(cornerRadius: 16)
+                }
+            } else if isExportingPDF {
+                ZStack {
+                    Color.black.opacity(0.15).ignoresSafeArea()
+                    ProgressView("Generating PDF…")
                         .padding(18)
                         .slideCropCard(cornerRadius: 16)
                 }
@@ -120,6 +157,36 @@ struct ResultsView: View {
                 requestedCount: paywallRequestedCount
             )
         }
+        .sheet(isPresented: $showingPDFPreview, onDismiss: cleanupPDFExport) {
+            if let pdfURL {
+                PDFPreviewView(pdfURL: pdfURL) { completed in
+                    if completed && pdfExportNeedsConsume {
+                        freeSaveCounter.consumePDFExport()
+                        pdfExportNeedsConsume = false
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingLayoutPicker) {
+            PDFLayoutPickerView { layout, orientation in
+                showingLayoutPicker = false
+                pendingPDFLayout = layout
+                pendingPDFOrientation = orientation
+            }
+            .presentationDetents([.height(360)])
+        }
+        .onChange(of: showingLayoutPicker) { _, showing in
+            guard !showing else { return }
+            guard let layout = pendingPDFLayout,
+                  let orientation = pendingPDFOrientation else {
+                pendingPDFLayout = nil
+                pendingPDFOrientation = nil
+                return
+            }
+            pendingPDFLayout = nil
+            pendingPDFOrientation = nil
+            Task { await handlePDFExport(layout: layout, orientation: orientation) }
+        }
         .onAppear {
             refreshRemainingFreeSaves()
             initializeSelectionIfNeeded(with: processingViewModel.processedItems)
@@ -148,48 +215,51 @@ struct ResultsView: View {
         }
     }
 
-    private var readyItems: [UUID] {
-        processingViewModel.processedItems
-            .filter { $0.status == .auto }
-            .map(\.id)
+    private struct CategorizedItems {
+        var readyIDs: [UUID] = []
+        var reviewIDs: [UUID] = []
+        var failedIDs: [UUID] = []
+        var exportable: [ProcessedItem] = []
+        var replaceable: [ProcessedItem] = []
+        var selectedExportable: [ProcessedItem] = []
+        var selectedReplaceable: [ProcessedItem] = []
     }
 
-    private var needsReviewItems: [UUID] {
-        processingViewModel.processedItems
-            .filter { $0.status == .review }
-            .map(\.id)
+    private var categorized: CategorizedItems {
+        var result = CategorizedItems()
+        for item in processingViewModel.processedItems {
+            switch item.status {
+            case .auto:
+                result.readyIDs.append(item.id)
+            case .review:
+                result.reviewIDs.append(item.id)
+            case .failed:
+                result.failedIDs.append(item.id)
+            }
+
+            if item.status != .failed, item.processedImageURL != nil {
+                result.exportable.append(item)
+                if item.canReplaceOriginal {
+                    result.replaceable.append(item)
+                }
+                if selectedIDs.contains(item.id) {
+                    result.selectedExportable.append(item)
+                    if item.canReplaceOriginal {
+                        result.selectedReplaceable.append(item)
+                    }
+                }
+            }
+        }
+        return result
     }
 
-    private var failedItems: [UUID] {
-        processingViewModel.processedItems
-            .filter { $0.status == .failed }
-            .map(\.id)
-    }
-
-    private var exportableItems: [ProcessedItem] {
-        processingViewModel.processedItems
-            .filter { $0.status != .failed && $0.processedImageURL != nil }
-    }
-
-    private var replaceableItems: [ProcessedItem] {
-        exportableItems.filter(\.canReplaceOriginal)
-    }
-
-    private var selectedExportableItems: [ProcessedItem] {
-        exportableItems.filter { selectedIDs.contains($0.id) }
-    }
-
-    private var selectedReplaceableItems: [ProcessedItem] {
-        replaceableItems.filter { selectedIDs.contains($0.id) }
-    }
-
-    private var failedItemsCount: Int {
-        processingViewModel.processedItems.filter { $0.status == .failed }.count
-    }
-
-    private var replaceBlockedCount: Int {
-        selectedExportableItems.count - selectedReplaceableItems.count
-    }
+    private var readyItems: [UUID] { categorized.readyIDs }
+    private var needsReviewItems: [UUID] { categorized.reviewIDs }
+    private var failedItems: [UUID] { categorized.failedIDs }
+    private var failedItemsCount: Int { categorized.failedIDs.count }
+    private var selectedExportableItems: [ProcessedItem] { categorized.selectedExportable }
+    private var selectedReplaceableItems: [ProcessedItem] { categorized.selectedReplaceable }
+    private var replaceBlockedCount: Int { categorized.selectedExportable.count - categorized.selectedReplaceable.count }
 
     @ViewBuilder
     private var resultsSummaryCard: some View {
@@ -208,7 +278,7 @@ struct ResultsView: View {
             }
             .font(.subheadline.weight(.semibold))
 
-            Text(needsReviewItems.isEmpty && failedItemsCount == 0 ? "Looks good. You can save now." : "Review flagged items before final save for best results.")
+            Text(needsReviewItems.isEmpty && failedItemsCount == 0 ? "Looks good. You can save now." : "Please review flagged items before saving.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -239,7 +309,9 @@ struct ResultsView: View {
                 .disabled(resultsViewModel.isSaving || selectedExportableItems.isEmpty)
                 .frame(maxWidth: .infinity)
 
-                Button("Replace Originals") {
+                Button(replaceBlockedCount > 0
+                       ? "Replace \(selectedReplaceableItems.count) Original\(selectedReplaceableItems.count == 1 ? "" : "s")"
+                       : "Replace Originals") {
                     Task {
                         await handleReplaceOriginalsTap()
                     }
@@ -251,10 +323,34 @@ struct ResultsView: View {
             }
 
             if replaceBlockedCount > 0 {
-                Text("\(replaceBlockedCount) selected image(s) cannot replace originals. Reason: imported without direct Photo Library linkage (camera/file picker). Save as New still works.")
+                Text("\(replaceBlockedCount) of \(selectedExportableItems.count) selected can't replace originals (imported via camera or file picker). Use Save as New for those.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+
+            Button {
+                if !purchaseManager.isUnlocked {
+                    pendingSaveAction = nil
+                    paywallRequestedCount = 0
+                    showPaywall = true
+                } else {
+                    showingLayoutPicker = true
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    if isExportingPDF {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "doc.richtext")
+                    }
+                    Text("Export as PDF")
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .tint(.orange)
+            .disabled(selectedExportableItems.isEmpty || isExportingPDF || resultsViewModel.isSaving)
 
             if !purchaseManager.isUnlocked {
                 Text("Free saves left: \(remainingFreeSaves). Upgrade only when needed.")
@@ -273,16 +369,6 @@ struct ResultsView: View {
                 Text(title)
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.primary)
-                if title == "Needs Review" {
-                    Text("Perspective confidence is lower. Tap item to compare or adjust crop.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                if title == "Failed" {
-                    Text("Try Retry Best Quality. If still failing, use Adjust Crop for manual recovery.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             LazyVGrid(columns: columns, spacing: 14) {
@@ -315,6 +401,13 @@ struct ResultsView: View {
                                     }
                                     .disabled(retryingIDs.contains(id))
                                 }
+                                if item.canManualAdjust, item.cropQuad != nil {
+                                    Button(item.isEnhanced ? "Remove Enhancement" : "Apply Enhancement",
+                                           systemImage: item.isEnhanced ? "wand.and.rays.inverse" : "wand.and.rays") {
+                                        Task { await toggleEnhance(id: id) }
+                                    }
+                                    .disabled(retryingIDs.contains(id))
+                                }
                                 Button(selectedIDs.contains(id) ? "Deselect" : "Select", systemImage: selectedIDs.contains(id) ? "checkmark.circle" : "circle") { toggleSelection(for: id) }
                             }
 
@@ -331,12 +424,85 @@ struct ResultsView: View {
                                     )
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(selectedIDs.contains(id) ? "Selected, tap to deselect" : "Not selected, tap to select")
                             .padding(8)
                             .disabled(!isSelectable(item))
                         }
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var reorderListView: some View {
+        List {
+            Section {
+                ForEach(processingViewModel.processedItems) { item in
+                    reorderRow(item: item)
+                }
+                .onMove { source, destination in
+                    processingViewModel.moveItem(from: source, to: destination)
+                }
+            } header: {
+                Text("Drag to reorder items before saving")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .textCase(nil)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .environment(\.editMode, .constant(.active))
+        .scrollContentBackground(.hidden)
+    }
+
+    @ViewBuilder
+    private func reorderRow(item: ProcessedItem) -> some View {
+        HStack(spacing: 12) {
+            if let thumbnail = item.processedThumbnail ?? item.originalThumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            } else {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .frame(width: 48, height: 48)
+                    .overlay {
+                        Image(systemName: "photo")
+                            .foregroundStyle(.secondary)
+                    }
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.status.rawValue.capitalized)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(statusColor(for: item.status))
+
+                if item.confidenceScore > 0 {
+                    Text("\(Int(item.confidenceScore * 100))% confidence")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if selectedIDs.contains(item.id) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(SlideCropTheme.tint)
+            }
+        }
+        .padding(.vertical, 2)
+        .listRowBackground(Color.white.opacity(0.06))
+    }
+
+    private func statusColor(for status: ProcessedStatus) -> Color {
+        switch status {
+        case .auto: return SlideCropTheme.readyBadge
+        case .review: return SlideCropTheme.reviewBadge
+        case .failed: return SlideCropTheme.failedBadge
         }
     }
 
@@ -360,6 +526,7 @@ struct ResultsView: View {
         } else {
             selectedIDs.insert(id)
         }
+        HapticService.lightImpact()
     }
 
     private func initializeSelectionIfNeeded(with items: [ProcessedItem]) {
@@ -408,6 +575,7 @@ struct ResultsView: View {
     }
 
     private func runSaveAction(_ action: SaveAction) async {
+        guard !resultsViewModel.isSaving else { return }
         let savedCount: Int
         switch action {
         case .saveAsNew:
@@ -415,9 +583,10 @@ struct ResultsView: View {
         case .replaceOriginals:
             savedCount = await resultsViewModel.replaceOriginals(with: selectedReplaceableItems)
         }
-        let actionName: String
-        switch action { case .saveAsNew: actionName = "saveAsNew"; case .replaceOriginals: actionName = "replace" }
         registerFreeSaveUsage(savedCount)
+        if savedCount > 0 {
+            HapticService.successNotification()
+        }
     }
 
     private func presentPaywallIfNeeded(requestedCount: Int, action: SaveAction) -> Bool {
@@ -447,10 +616,37 @@ struct ResultsView: View {
         refreshRemainingFreeSaves()
     }
 
+    private func cleanupPDFExport() {
+        pdfExportNeedsConsume = false
+        guard let pdfURL else { return }
+        try? FileManager.default.removeItem(at: pdfURL)
+        self.pdfURL = nil
+    }
+
+    private func handlePDFExport(layout: PDFLayout, orientation: PDFOrientation) async {
+        let items = selectedExportableItems
+        guard !items.isEmpty else { return }
+
+        isExportingPDF = true
+        defer { isExportingPDF = false }
+
+        do {
+            let url = try await Task.detached(priority: .userInitiated) {
+                try PDFExportService.exportPDF(from: items, layout: layout, orientation: orientation)
+            }.value
+            pdfURL = url
+            pdfExportNeedsConsume = !purchaseManager.isUnlocked
+            showingPDFPreview = true
+            HapticService.successNotification()
+        } catch {
+            resultsViewModel.toastMessage = "PDF export failed: \(error.localizedDescription)"
+            HapticService.errorNotification()
+        }
+    }
 
     private func retryItem(id: UUID) async {
         guard let index = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) else { return }
-        var item = processingViewModel.processedItems[index]
+        let item = processingViewModel.processedItems[index]
         guard !retryingIDs.contains(id) else { return }
         retryingIDs.insert(id)
         defer { retryingIDs.remove(id) }
@@ -481,8 +677,39 @@ struct ResultsView: View {
         if merged.processedImageURL != nil && merged.status != .failed {
             selectedIDs.insert(merged.id)
             resultsViewModel.toastMessage = "Retry succeeded for one item."
+            HapticService.successNotification()
         } else {
             resultsViewModel.toastMessage = "Retry still failed. Try Adjust Crop for manual recovery."
+            HapticService.errorNotification()
+        }
+    }
+
+    private func toggleEnhance(id: UUID) async {
+        guard let index = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) else { return }
+        let item = processingViewModel.processedItems[index]
+        guard let quad = item.cropQuad, !retryingIDs.contains(id) else { return }
+
+        retryingIDs.insert(id)
+        defer { retryingIDs.remove(id) }
+
+        let newSettings = ProcessingSettings(enhanceReadability: !item.isEnhanced, quality: .best)
+        do {
+            let updated = try await retryService.processManualAdjustment(
+                assetIdentifier: item.assetIdentifier,
+                sourceImageURL: item.sourceImageURL,
+                quad: quad,
+                settings: newSettings,
+                originalThumbnail: item.originalThumbnail,
+                canReplaceOriginal: item.canReplaceOriginal,
+                canManualAdjust: item.canManualAdjust
+            )
+            var merged = updated
+            merged.id = item.id
+            processingViewModel.processedItems[index] = merged
+            HapticService.successNotification()
+        } catch {
+            resultsViewModel.toastMessage = "Enhancement toggle failed: \(error.localizedDescription)"
+            HapticService.errorNotification()
         }
     }
 
@@ -491,13 +718,105 @@ struct ResultsView: View {
     }
 
     private func binding(for id: UUID) -> Binding<ProcessedItem>? {
-        guard let index = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) else {
+        guard processingViewModel.processedItems.contains(where: { $0.id == id }) else {
             return nil
         }
 
         return Binding(
-            get: { processingViewModel.processedItems[index] },
-            set: { processingViewModel.processedItems[index] = $0 }
+            get: {
+                processingViewModel.processedItems.first(where: { $0.id == id })
+                    ?? ProcessedItem(assetIdentifier: "", originalThumbnail: nil, processedThumbnail: nil, sourceImageURL: nil, processedImageURL: nil, confidenceScore: 0, status: .failed, cropQuad: nil, errorMessage: nil, canReplaceOriginal: false, canManualAdjust: false)
+            },
+            set: { newValue in
+                if let idx = processingViewModel.processedItems.firstIndex(where: { $0.id == id }) {
+                    processingViewModel.processedItems[idx] = newValue
+                }
+            }
+        )
+    }
+}
+
+private struct PDFLayoutPickerView: View {
+    let onSelect: (PDFLayout, PDFOrientation) -> Void
+
+    @State private var orientation: PDFOrientation = .portrait
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("PDF Layout")
+                .font(.title3.weight(.semibold))
+                .padding(.top, 20)
+
+            Picker("Orientation", selection: $orientation) {
+                ForEach(PDFOrientation.allCases) { o in
+                    Label(o.rawValue, systemImage: o.iconName)
+                        .tag(o)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 20)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(PDFLayout.allCases) { layout in
+                    Button {
+                        HapticService.lightImpact()
+                        onSelect(layout, orientation)
+                    } label: {
+                        VStack(spacing: 8) {
+                            layoutPreview(layout)
+                                .frame(width: previewWidth, height: previewHeight)
+                            Text(layout.rawValue)
+                                .font(.caption.weight(.medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .slideCropCard(cornerRadius: 12)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+
+            Spacer()
+        }
+    }
+
+    private var previewWidth: CGFloat {
+        orientation == .landscape ? 72 : 56
+    }
+
+    private var previewHeight: CGFloat {
+        orientation == .landscape ? 50 : 72
+    }
+
+    @ViewBuilder
+    private func layoutPreview(_ layout: PDFLayout) -> some View {
+        let cols = layout.columns
+        let rows = layout.rows
+        let spacing: CGFloat = 4
+
+        GeometryReader { geo in
+            let totalHSpacing = spacing * CGFloat(cols - 1)
+            let totalVSpacing = spacing * CGFloat(rows - 1)
+            let cellW = (geo.size.width - totalHSpacing) / CGFloat(cols)
+            let cellH = (geo.size.height - totalVSpacing) / CGFloat(rows)
+
+            ForEach(0..<(cols * rows), id: \.self) { index in
+                let col = index % cols
+                let row = index / cols
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .fill(SlideCropTheme.tint.opacity(0.35))
+                    .frame(width: cellW, height: cellH)
+                    .position(
+                        x: CGFloat(col) * (cellW + spacing) + cellW / 2,
+                        y: CGFloat(row) * (cellH + spacing) + cellH / 2
+                    )
+            }
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
         )
     }
 }

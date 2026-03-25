@@ -32,6 +32,53 @@ struct CropQuad: Hashable, Codable {
         return abs(sum1 - sum2) * 0.5
     }
 
+    var isConvex: Bool {
+        let p = points
+        guard p.count == 4 else { return false }
+        var sign: Int?
+        for i in 0..<4 {
+            let a = p[i]
+            let b = p[(i + 1) % 4]
+            let c = p[(i + 2) % 4]
+            let cross = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x)
+            if abs(cross) < 1e-10 { return false }
+            let s = cross > 0 ? 1 : -1
+            if let existing = sign, existing != s { return false }
+            sign = s
+        }
+        return true
+    }
+
+    func snappedToAspectRatio(_ ratio: CGFloat, imageAspect: CGFloat) -> CropQuad {
+        let center = centroid
+        let adjustedRatio = ratio * (1.0 / max(imageAspect, 0.001))
+
+        var w: CGFloat
+        var h: CGFloat
+
+        if adjustedRatio >= 1 {
+            w = min(0.9, max(0.2, (points.map(\.x).max() ?? 0.92) - (points.map(\.x).min() ?? 0.08)))
+            h = w / adjustedRatio
+            if h > 0.9 { h = 0.9; w = h * adjustedRatio }
+        } else {
+            h = min(0.9, max(0.2, (points.map(\.y).max() ?? 0.92) - (points.map(\.y).min() ?? 0.08)))
+            w = h * adjustedRatio
+            if w > 0.9 { w = 0.9; h = w / adjustedRatio }
+        }
+
+        let halfW = w / 2
+        let halfH = h / 2
+        let cx = min(max(center.x, halfW), 1 - halfW)
+        let cy = min(max(center.y, halfH), 1 - halfH)
+
+        return CropQuad(
+            topLeft: CGPoint(x: cx - halfW, y: cy - halfH),
+            topRight: CGPoint(x: cx + halfW, y: cy - halfH),
+            bottomRight: CGPoint(x: cx + halfW, y: cy + halfH),
+            bottomLeft: CGPoint(x: cx - halfW, y: cy + halfH)
+        ).clamped()
+    }
+
     func clamped() -> CropQuad {
         CropQuad(
             topLeft: topLeft.clampedUnit,

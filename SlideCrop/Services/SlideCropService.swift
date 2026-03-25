@@ -154,7 +154,8 @@ final class SlideCropService {
                 cropQuad: cleaned,
                 errorMessage: nil,
                 canReplaceOriginal: canReplaceOriginal,
-                canManualAdjust: canManualAdjust
+                canManualAdjust: canManualAdjust,
+                isEnhanced: settings.enhanceReadability
             )
         }
     }
@@ -236,8 +237,15 @@ final class SlideCropService {
             cropQuad: best.quad,
             errorMessage: nil,
             canReplaceOriginal: canReplaceOriginal,
-            canManualAdjust: canManualAdjust
+            canManualAdjust: canManualAdjust,
+            isEnhanced: settings.enhanceReadability
         )
+    }
+
+    func detectSnapTargets(in image: UIImage) -> [CropQuad] {
+        guard let cgImage = image.cgImage else { return [] }
+        guard let observations = try? detectRectangles(in: cgImage) else { return [] }
+        return observations.map { cropQuad(from: $0) }
     }
 
     private func detectRectangles(in image: CGImage) throws -> [VNRectangleObservation] {
@@ -282,13 +290,14 @@ final class SlideCropService {
 
         let skewScore = skewSanityScore(for: quad)
 
-        let textBonus = textDensityBonus(in: corrected)
-
-        let weighted = (areaScore * 0.36)
+        let preliminaryScore = (areaScore * 0.36)
             + (aspectScore * 0.25)
             + (centerednessScore * 0.18)
             + (skewScore * 0.16)
-            + (textBonus * 0.05)
+
+        let textBonus = preliminaryScore >= 0.40 ? textDensityBonus(in: corrected) : 0.0
+
+        let weighted = preliminaryScore + (textBonus * 0.05)
 
         return CandidateScore(
             quad: quad,
@@ -504,6 +513,24 @@ final class SlideCropService {
     }
 
     private func loadHighResolutionCIImage(for asset: PHAsset) async throws -> CIImage {
+        try await withThrowingTaskGroup(of: CIImage.self) { group in
+            group.addTask {
+                try await self.fetchHighResolutionCIImage(for: asset)
+            }
+            group.addTask {
+                try await Task.sleep(for: .seconds(30))
+                throw SlideCropError.iCloudTimeout
+            }
+
+            guard let result = try await group.next() else {
+                throw SlideCropError.iCloudTimeout
+            }
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private func fetchHighResolutionCIImage(for asset: PHAsset) async throws -> CIImage {
         try await withCheckedThrowingContinuation { continuation in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat

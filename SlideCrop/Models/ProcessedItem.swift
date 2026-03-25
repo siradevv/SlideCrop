@@ -20,4 +20,5 @@ struct ProcessedItem: Identifiable {
     var errorMessage: String?
     var canReplaceOriginal: Bool = true
     var canManualAdjust: Bool = true
+    var isEnhanced: Bool = true
 }

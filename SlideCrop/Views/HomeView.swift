@@ -22,6 +22,7 @@ struct HomeView: View {
 
     @State private var showingPhotoPicker = false
     @State private var showingCameraPicker = false
+    @State private var showingFilePicker = false
     @State private var navigationPath: [HomeRoute] = []
     @State private var showingSettings = false
     @State private var showPermissionAlert = false
@@ -103,13 +104,25 @@ struct HomeView: View {
                     .buttonStyle(PressScaleButtonStyle())
                     .padding(.horizontal, 24)
 
-                    VStack(spacing: 6) {
-                        Text("Tip: Replace Originals works only for photos selected directly from the library with sufficient access.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
+                    Button {
+                        showingFilePicker = true
+                    } label: {
+                        Label("Import from Files", systemImage: "folder")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(.ultraThinMaterial)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .stroke(Color.white.opacity(0.34), lineWidth: 1)
+                            )
                     }
+                    .buttonStyle(PressScaleButtonStyle())
+                    .padding(.horizontal, 24)
 
                     if authorizationStatus == .limited {
                         Button("Manage Limited Library Access") {
@@ -189,6 +202,19 @@ struct HomeView: View {
                         Task {
                             await handlePickerImportFailure()
                         }
+                    }
+                )
+            }
+            .sheet(isPresented: $showingFilePicker) {
+                DocumentPickerView(
+                    onComplete: { inputs in
+                        showingFilePicker = false
+                        Task {
+                            await beginProcessing(with: inputs)
+                        }
+                    },
+                    onCancel: {
+                        showingFilePicker = false
                     }
                 )
             }
@@ -581,6 +607,54 @@ struct CameraCaptureView: UIViewControllerRepresentable {
             parent.onCapture(
                 SelectedPhotoInput(assetIdentifier: nil, itemProvider: nil, imageData: imageData)
             )
+        }
+    }
+}
+
+struct DocumentPickerView: UIViewControllerRepresentable {
+    let onComplete: ([SelectedPhotoInput]) -> Void
+    let onCancel: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onComplete: onComplete, onCancel: onCancel)
+    }
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.image])
+        picker.allowsMultipleSelection = true
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    final class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let onComplete: ([SelectedPhotoInput]) -> Void
+        let onCancel: () -> Void
+
+        init(onComplete: @escaping ([SelectedPhotoInput]) -> Void, onCancel: @escaping () -> Void) {
+            self.onComplete = onComplete
+            self.onCancel = onCancel
+        }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            var inputs: [SelectedPhotoInput] = []
+            for url in urls {
+                let didAccess = url.startAccessingSecurityScopedResource()
+                defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
+
+                guard let data = try? Data(contentsOf: url) else { continue }
+                inputs.append(SelectedPhotoInput(assetIdentifier: nil, itemProvider: nil, imageData: data))
+            }
+            if inputs.isEmpty {
+                onCancel()
+            } else {
+                onComplete(inputs)
+            }
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            onCancel()
         }
     }
 }

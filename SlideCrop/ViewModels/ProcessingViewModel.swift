@@ -26,6 +26,10 @@ final class ProcessingViewModel: ObservableObject {
         self.photoLibraryService = photoLibraryService
     }
 
+    func moveItem(from source: IndexSet, to destination: Int) {
+        processedItems.move(fromOffsets: source, toOffset: destination)
+    }
+
     var hasCompletedRun: Bool {
         !isProcessing && totalCount > 0
     }
@@ -292,7 +296,7 @@ final class ProcessingViewModel: ObservableObject {
                 index: index,
                 displayIdentifier: syntheticIdentifier,
                 previewThumbnail: nil,
-                item: makeImportFailureItem(assetIdentifier: syntheticIdentifier),
+                item: makeImportFailureItem(assetIdentifier: syntheticIdentifier, reason: "No image provider available for this selection."),
                 sourceLabel: "itemProvider",
                 loadMs: nil,
                 thumbnailMs: nil,
@@ -308,7 +312,7 @@ final class ProcessingViewModel: ObservableObject {
                 index: index,
                 displayIdentifier: syntheticIdentifier,
                 previewThumbnail: nil,
-                item: makeImportFailureItem(assetIdentifier: syntheticIdentifier),
+                item: makeImportFailureItem(assetIdentifier: syntheticIdentifier, reason: "Could not load image data. The file may be in an unsupported format."),
                 sourceLabel: "itemProvider",
                 loadMs: elapsedMilliseconds(since: loadStart),
                 thumbnailMs: nil,
@@ -346,7 +350,7 @@ final class ProcessingViewModel: ObservableObject {
         )
     }
 
-    private static func makeImportFailureItem(assetIdentifier: String) -> ProcessedItem {
+    private static func makeImportFailureItem(assetIdentifier: String, reason: String = "Unable to import this selected photo.") -> ProcessedItem {
         ProcessedItem(
             assetIdentifier: assetIdentifier,
             originalThumbnail: nil,
@@ -356,7 +360,7 @@ final class ProcessingViewModel: ObservableObject {
             confidenceScore: 0,
             status: .failed,
             cropQuad: nil,
-            errorMessage: "Unable to import this selected photo.",
+            errorMessage: reason,
             canReplaceOriginal: false,
             canManualAdjust: false
         )

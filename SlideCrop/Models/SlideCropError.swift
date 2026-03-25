@@ -6,6 +6,7 @@ enum SlideCropError: LocalizedError {
     case perspectiveFailed
     case outputFailed
     case permissionDenied
+    case iCloudTimeout
 
     var errorDescription: String? {
         switch self {
@@ -19,6 +20,8 @@ enum SlideCropError: LocalizedError {
             return "Failed to render the processed output image."
         case .permissionDenied:
             return "Photo library permission was denied."
+        case .iCloudTimeout:
+            return "Photo download from iCloud timed out. Check your network connection and try again."
         }
     }
 }
